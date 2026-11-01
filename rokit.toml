@@ -1,8 +1,12 @@
 # Инструменты проекта с зафиксированными версиями.
 # Установка Rokit: https://github.com/rojo-rbx/rokit
 # Затем в папке проекта: rokit install
+#
+# Этот же файл читает проверка в GitHub Actions (.github/workflows/check.yml),
+# поэтому версии у вас локально и в CI всегда совпадают.
 
 [tools]
 rojo = "rojo-rbx/rojo@7.4.4"
 selene = "Kampfkarren/selene@0.27.1"
 stylua = "JohnnyMorganz/StyLua@2.0.2"
+luau-lsp = "JohnnyMorganz/luau-lsp@1.70.1"

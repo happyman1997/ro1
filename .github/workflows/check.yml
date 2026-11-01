@@ -1,0 +1,69 @@
+# Проверка кода на каждый пуш и пулл-реквест:
+#   rojo build      — проект собирается в файл места
+#   luau-lsp        — типы в строгом режиме с описаниями API Roblox + линтер
+#   StyLua          — форматирование по stylua.toml
+#   selene          — линтер для Roblox
+# Версии инструментов берутся из rokit.toml.
+
+name: Проверка кода
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: check-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: Luau
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Установка инструментов из rokit.toml
+        run: |
+          # Версия инструмента из строки вида: rojo = "rojo-rbx/rojo@7.4.4"
+          version() { sed -n "s/^$1 *= *\"[^@]*@\(.*\)\"/\1/p" rokit.toml; }
+          ROJO=$(version rojo); SELENE=$(version selene); STYLUA=$(version stylua); LUAU_LSP=$(version luau-lsp)
+          echo "rojo $ROJO, selene $SELENE, stylua $STYLUA, luau-lsp $LUAU_LSP"
+
+          BIN="$RUNNER_TEMP/bin"
+          mkdir -p "$BIN"
+          get() { curl -fsSL "$1" -o "$RUNNER_TEMP/tool.zip" && unzip -o -q "$RUNNER_TEMP/tool.zip" -d "$BIN"; }
+          get "https://github.com/rojo-rbx/rojo/releases/download/v$ROJO/rojo-$ROJO-linux-x86_64.zip"
+          get "https://github.com/Kampfkarren/selene/releases/download/$SELENE/selene-$SELENE-linux.zip"
+          get "https://github.com/JohnnyMorganz/StyLua/releases/download/v$STYLUA/stylua-linux-x86_64.zip"
+          get "https://github.com/JohnnyMorganz/luau-lsp/releases/download/$LUAU_LSP/luau-lsp-linux-x86_64.zip"
+          chmod +x "$BIN"/*
+          echo "$BIN" >> "$GITHUB_PATH"
+
+          # Описания API Roblox для luau-lsp (уровень доступа обычных скриптов игры).
+          curl -fsSL -o "$RUNNER_TEMP/globalTypes.d.luau" \
+            https://raw.githubusercontent.com/JohnnyMorganz/luau-lsp/main/scripts/globalTypes.None.d.luau
+
+      # Следующие шаги выполняются, даже если предыдущая проверка упала:
+      # так за один запуск видны все проблемы сразу.
+      - name: Сборка (rojo build)
+        if: ${{ !cancelled() }}
+        run: rojo build default.project.json -o "$RUNNER_TEMP/ro1.rbxlx"
+
+      - name: Типы и линтер (luau-lsp)
+        if: ${{ !cancelled() }}
+        run: |
+          rojo sourcemap default.project.json -o sourcemap.json
+          luau-lsp analyze --platform=roblox --sourcemap=sourcemap.json \
+            --definitions=@roblox="$RUNNER_TEMP/globalTypes.d.luau" src
+
+      - name: Форматирование (StyLua)
+        if: ${{ !cancelled() }}
+        run: stylua --check src
+
+      - name: Линтер (selene)
+        if: ${{ !cancelled() }}
+        run: selene src

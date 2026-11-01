@@ -163,3 +163,8 @@ rojo sourcemap -o sourcemap.json
 `selene` — линтер, `stylua` — форматирование. Sourcemap нужен расширению
 luau-lsp в VS Code, чтобы понимать пути вида `script.Parent.Services`.
 Рекомендуемые расширения перечислены в `.vscode/extensions.json`.
+
+Те же проверки, а также `luau-lsp analyze` (типы в строгом режиме) и
+`rojo build`, автоматически запускаются в GitHub Actions на каждый пуш
+и пулл-реквест: вкладка **Actions → «Проверка кода»**. Версии инструментов
+берутся из `rokit.toml`.
