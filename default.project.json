@@ -12,11 +12,67 @@
         "$path": "src/server"
       }
     },
+    "ServerStorage": {
+      "Restaurants": {
+        "$path": "scene/Restaurants"
+      }
+    },
     "StarterPlayer": {
       "StarterPlayerScripts": {
         "Client": {
           "$path": "src/client"
         }
+      }
+    },
+    "StarterPack": {
+      "TestWeapon": {
+        "$className": "Tool",
+        "$properties": {
+          "ToolTip": "Тестовое оружие: охрана видит его в руках, стрелять им нельзя",
+          "CanBeDropped": false
+        },
+        "Handle": {
+          "$className": "Part",
+          "$properties": {
+            "Size": [0.4, 1.2, 2],
+            "Color": [0.15, 0.15, 0.15],
+            "Material": "Metal",
+            "CanCollide": false
+          }
+        }
+      }
+    },
+    "TextChatService": {
+      "$properties": {
+        "ChatVersion": "TextChatService"
+      }
+    },
+    "Workspace": {
+      "Baseplate": {
+        "$className": "Part",
+        "$properties": {
+          "Anchored": true,
+          "Locked": true,
+          "Size": [512, 2, 512],
+          "CFrame": { "CFrame": { "position": [0, -1, 0], "orientation": [[1, 0, 0], [0, 1, 0], [0, 0, 1]] } },
+          "Color": [0.36, 0.55, 0.29],
+          "Material": "Grass",
+          "TopSurface": "Smooth",
+          "BottomSurface": "Smooth"
+        }
+      },
+      "LobbySpawn": {
+        "$className": "SpawnLocation",
+        "$properties": {
+          "Anchored": true,
+          "Size": [8, 1, 8],
+          "CFrame": { "CFrame": { "position": [0, 0.5, 70], "orientation": [[1, 0, 0], [0, 1, 0], [0, 0, 1]] } },
+          "Neutral": true,
+          "Duration": 3
+        }
+      },
+      "Plots": {
+        "$path": "scene/Plots"
       }
     }
   }

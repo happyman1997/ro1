@@ -155,6 +155,42 @@ local function onCharacterAdded(player: Player, character: Model)
 	end)
 end
 
+-- Сменить класс игрока (вызывают Remote и чат-команды). Все правила проверяются здесь.
+function ClassService:selectClass(player: Player, classId: string)
+	if Classes[classId] == nil then
+		return
+	end
+	if not DataService:isLoaded(player) or classId == getClassId(player) then
+		return
+	end
+	if hacking[player] then
+		return
+	end
+
+	local now = os.clock()
+	local remaining = CLASS_CHANGE_COOLDOWN - (now - (lastChangeAt[player] or -math.huge))
+	if remaining > 0 then
+		NetService:notify(player, `Сменить класс можно через {math.ceil(remaining)} с`)
+		return
+	end
+
+	local plot = PlotService:getPlot(player)
+	local _, _, root = CharacterUtil.getAlive(player)
+	if plot == nil or root == nil or not PlotService:isInTerritory(plot, root.Position) then
+		NetService:notify(
+			player,
+			"Сменить класс можно только на территории своего ресторана"
+		)
+		return
+	end
+
+	lastChangeAt[player] = now
+	DataService:set(player, "Class", classId)
+	setClassAttributes(player)
+	applyStats(player, true)
+	NetService:notify(player, `Класс: {Classes[classId].Name}`)
+end
+
 --------------------------------------------------------------------------------
 -- Жизненный цикл
 --------------------------------------------------------------------------------
@@ -182,35 +218,7 @@ function ClassService:Start()
 		rate = 1,
 		burst = 3,
 	}, function(player: Player, classId: string)
-		if not DataService:isLoaded(player) or classId == getClassId(player) then
-			return
-		end
-		if hacking[player] then
-			return
-		end
-
-		local now = os.clock()
-		local remaining = CLASS_CHANGE_COOLDOWN - (now - (lastChangeAt[player] or -math.huge))
-		if remaining > 0 then
-			NetService:notify(player, `Сменить класс можно через {math.ceil(remaining)} с`)
-			return
-		end
-
-		local plot = PlotService:getPlot(player)
-		local _, _, root = CharacterUtil.getAlive(player)
-		if plot == nil or root == nil or not PlotService:isInTerritory(plot, root.Position) then
-			NetService:notify(
-				player,
-				"Сменить класс можно только на территории своего ресторана"
-			)
-			return
-		end
-
-		lastChangeAt[player] = now
-		DataService:set(player, "Class", classId)
-		setClassAttributes(player)
-		applyStats(player, true)
-		NetService:notify(player, `Класс: {Classes[classId].Name}`)
+		ClassService:selectClass(player, classId)
 	end)
 end
 

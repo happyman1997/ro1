@@ -1,0 +1,1020 @@
+{
+  "ClassName": "Model",
+  "Properties": {
+    "WorldPivot": {
+      "CFrame": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "orientation": [
+          [
+            1,
+            0,
+            0
+          ],
+          [
+            0,
+            1,
+            0
+          ],
+          [
+            0,
+            0,
+            1
+          ]
+        ]
+      }
+    }
+  },
+  "Children": [
+    {
+      "Name": "Structure",
+      "ClassName": "Folder",
+      "Children": [
+        {
+          "Name": "Floor",
+          "ClassName": "Part",
+          "Properties": {
+            "Anchored": true,
+            "Size": [
+              26,
+              0.4,
+              20
+            ],
+            "CFrame": {
+              "CFrame": {
+                "position": [
+                  0,
+                  0.2,
+                  0
+                ],
+                "orientation": [
+                  [
+                    1,
+                    0,
+                    0
+                  ],
+                  [
+                    0,
+                    1,
+                    0
+                  ],
+                  [
+                    0,
+                    0,
+                    1
+                  ]
+                ]
+              }
+            },
+            "Color": [
+              0.45,
+              0.42,
+              0.38
+            ],
+            "Material": "Slate",
+            "TopSurface": "Smooth",
+            "BottomSurface": "Smooth"
+          }
+        },
+        {
+          "Name": "BackWall",
+          "ClassName": "Part",
+          "Properties": {
+            "Anchored": true,
+            "Size": [
+              26,
+              12,
+              0.6
+            ],
+            "CFrame": {
+              "CFrame": {
+                "position": [
+                  0,
+                  6.4,
+                  -10.0
+                ],
+                "orientation": [
+                  [
+                    1,
+                    0,
+                    0
+                  ],
+                  [
+                    0,
+                    1,
+                    0
+                  ],
+                  [
+                    0,
+                    0,
+                    1
+                  ]
+                ]
+              }
+            },
+            "Color": [
+              0.78,
+              0.78,
+              0.78
+            ],
+            "Material": "Concrete",
+            "TopSurface": "Smooth",
+            "BottomSurface": "Smooth"
+          }
+        },
+        {
+          "Name": "LeftWall",
+          "ClassName": "Part",
+          "Properties": {
+            "Anchored": true,
+            "Size": [
+              0.6,
+              12,
+              20
+            ],
+            "CFrame": {
+              "CFrame": {
+                "position": [
+                  -13.0,
+                  6.4,
+                  0
+                ],
+                "orientation": [
+                  [
+                    1,
+                    0,
+                    0
+                  ],
+                  [
+                    0,
+                    1,
+                    0
+                  ],
+                  [
+                    0,
+                    0,
+                    1
+                  ]
+                ]
+              }
+            },
+            "Color": [
+              0.78,
+              0.78,
+              0.78
+            ],
+            "Material": "Concrete",
+            "TopSurface": "Smooth",
+            "BottomSurface": "Smooth"
+          }
+        },
+        {
+          "Name": "RightWall",
+          "ClassName": "Part",
+          "Properties": {
+            "Anchored": true,
+            "Size": [
+              0.6,
+              12,
+              20
+            ],
+            "CFrame": {
+              "CFrame": {
+                "position": [
+                  13.0,
+                  6.4,
+                  0
+                ],
+                "orientation": [
+                  [
+                    1,
+                    0,
+                    0
+                  ],
+                  [
+                    0,
+                    1,
+                    0
+                  ],
+                  [
+                    0,
+                    0,
+                    1
+                  ]
+                ]
+              }
+            },
+            "Color": [
+              0.78,
+              0.78,
+              0.78
+            ],
+            "Material": "Concrete",
+            "TopSurface": "Smooth",
+            "BottomSurface": "Smooth"
+          }
+        },
+        {
+          "Name": "Roof",
+          "ClassName": "Part",
+          "Properties": {
+            "Anchored": true,
+            "Size": [
+              27,
+              0.4,
+              21
+            ],
+            "CFrame": {
+              "CFrame": {
+                "position": [
+                  0,
+                  12.6,
+                  0
+                ],
+                "orientation": [
+                  [
+                    1,
+                    0,
+                    0
+                  ],
+                  [
+                    0,
+                    1,
+                    0
+                  ],
+                  [
+                    0,
+                    0,
+                    1
+                  ]
+                ]
+              }
+            },
+            "Color": [
+              0.3,
+              0.3,
+              0.32
+            ],
+            "Material": "Slate",
+            "TopSurface": "Smooth",
+            "BottomSurface": "Smooth"
+          }
+        },
+        {
+          "Name": "Canopy",
+          "ClassName": "Part",
+          "Properties": {
+            "Anchored": true,
+            "Size": [
+              28,
+              0.4,
+              6
+            ],
+            "CFrame": {
+              "CFrame": {
+                "position": [
+                  0,
+                  11.9,
+                  13.0
+                ],
+                "orientation": [
+                  [
+                    1,
+                    0,
+                    0
+                  ],
+                  [
+                    0,
+                    1,
+                    0
+                  ],
+                  [
+                    0,
+                    0,
+                    1
+                  ]
+                ]
+              }
+            },
+            "Color": [
+              0.75,
+              0.2,
+              0.2
+            ],
+            "Material": "Fabric",
+            "TopSurface": "Smooth",
+            "BottomSurface": "Smooth"
+          }
+        },
+        {
+          "Name": "FrontLeft",
+          "ClassName": "Part",
+          "Properties": {
+            "Anchored": true,
+            "Size": [
+              10.0,
+              12,
+              0.6
+            ],
+            "CFrame": {
+              "CFrame": {
+                "position": [
+                  -8.0,
+                  6.4,
+                  10.0
+                ],
+                "orientation": [
+                  [
+                    1,
+                    0,
+                    0
+                  ],
+                  [
+                    0,
+                    1,
+                    0
+                  ],
+                  [
+                    0,
+                    0,
+                    1
+                  ]
+                ]
+              }
+            },
+            "Color": [
+              0.55,
+              0.75,
+              0.9
+            ],
+            "Material": "Glass",
+            "TopSurface": "Smooth",
+            "BottomSurface": "Smooth",
+            "Transparency": 0.45,
+            "Attributes": {
+              "Attributes": {
+                "SeeThrough": {
+                  "Bool": true
+                }
+              }
+            }
+          }
+        },
+        {
+          "Name": "FrontRight",
+          "ClassName": "Part",
+          "Properties": {
+            "Anchored": true,
+            "Size": [
+              10.0,
+              12,
+              0.6
+            ],
+            "CFrame": {
+              "CFrame": {
+                "position": [
+                  8.0,
+                  6.4,
+                  10.0
+                ],
+                "orientation": [
+                  [
+                    1,
+                    0,
+                    0
+                  ],
+                  [
+                    0,
+                    1,
+                    0
+                  ],
+                  [
+                    0,
+                    0,
+                    1
+                  ]
+                ]
+              }
+            },
+            "Color": [
+              0.55,
+              0.75,
+              0.9
+            ],
+            "Material": "Glass",
+            "TopSurface": "Smooth",
+            "BottomSurface": "Smooth",
+            "Transparency": 0.45,
+            "Attributes": {
+              "Attributes": {
+                "SeeThrough": {
+                  "Bool": true
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "Name": "Furniture",
+      "ClassName": "Folder",
+      "Children": [
+        {
+          "Name": "Counter",
+          "ClassName": "Part",
+          "Properties": {
+            "Anchored": true,
+            "Size": [
+              8,
+              3,
+              1.5
+            ],
+            "CFrame": {
+              "CFrame": {
+                "position": [
+                  0,
+                  1.9,
+                  7.0
+                ],
+                "orientation": [
+                  [
+                    1,
+                    0,
+                    0
+                  ],
+                  [
+                    0,
+                    1,
+                    0
+                  ],
+                  [
+                    0,
+                    0,
+                    1
+                  ]
+                ]
+              }
+            },
+            "Color": [
+              0.6,
+              0.45,
+              0.3
+            ],
+            "Material": "Wood",
+            "TopSurface": "Smooth",
+            "BottomSurface": "Smooth",
+            "Tags": [
+              "Furniture"
+            ]
+          }
+        },
+        {
+          "Name": "Stove",
+          "ClassName": "Part",
+          "Properties": {
+            "Anchored": true,
+            "Size": [
+              3,
+              3,
+              2
+            ],
+            "CFrame": {
+              "CFrame": {
+                "position": [
+                  -10.5,
+                  1.9,
+                  -8.2
+                ],
+                "orientation": [
+                  [
+                    1,
+                    0,
+                    0
+                  ],
+                  [
+                    0,
+                    1,
+                    0
+                  ],
+                  [
+                    0,
+                    0,
+                    1
+                  ]
+                ]
+              }
+            },
+            "Color": [
+              0.2,
+              0.2,
+              0.22
+            ],
+            "Material": "Metal",
+            "TopSurface": "Smooth",
+            "BottomSurface": "Smooth",
+            "Tags": [
+              "Furniture"
+            ]
+          }
+        },
+        {
+          "Name": "Table1",
+          "ClassName": "Part",
+          "Properties": {
+            "Anchored": true,
+            "Size": [
+              4,
+              2,
+              3
+            ],
+            "CFrame": {
+              "CFrame": {
+                "position": [
+                  -7.5,
+                  1.4,
+                  -2.5
+                ],
+                "orientation": [
+                  [
+                    1,
+                    0,
+                    0
+                  ],
+                  [
+                    0,
+                    1,
+                    0
+                  ],
+                  [
+                    0,
+                    0,
+                    1
+                  ]
+                ]
+              }
+            },
+            "Color": [
+              0.85,
+              0.85,
+              0.8
+            ],
+            "Material": "Wood",
+            "TopSurface": "Smooth",
+            "BottomSurface": "Smooth",
+            "Tags": [
+              "Furniture"
+            ]
+          }
+        },
+        {
+          "Name": "Table2",
+          "ClassName": "Part",
+          "Properties": {
+            "Anchored": true,
+            "Size": [
+              4,
+              2,
+              3
+            ],
+            "CFrame": {
+              "CFrame": {
+                "position": [
+                  7.5,
+                  1.4,
+                  -2.5
+                ],
+                "orientation": [
+                  [
+                    1,
+                    0,
+                    0
+                  ],
+                  [
+                    0,
+                    1,
+                    0
+                  ],
+                  [
+                    0,
+                    0,
+                    1
+                  ]
+                ]
+              }
+            },
+            "Color": [
+              0.85,
+              0.85,
+              0.8
+            ],
+            "Material": "Wood",
+            "TopSurface": "Smooth",
+            "BottomSurface": "Smooth",
+            "Tags": [
+              "Furniture"
+            ]
+          }
+        },
+        {
+          "Name": "Table3",
+          "ClassName": "Part",
+          "Properties": {
+            "Anchored": true,
+            "Size": [
+              4,
+              2,
+              3
+            ],
+            "CFrame": {
+              "CFrame": {
+                "position": [
+                  -7.5,
+                  1.4,
+                  -6.667
+                ],
+                "orientation": [
+                  [
+                    1,
+                    0,
+                    0
+                  ],
+                  [
+                    0,
+                    1,
+                    0
+                  ],
+                  [
+                    0,
+                    0,
+                    1
+                  ]
+                ]
+              }
+            },
+            "Color": [
+              0.85,
+              0.85,
+              0.8
+            ],
+            "Material": "Wood",
+            "TopSurface": "Smooth",
+            "BottomSurface": "Smooth",
+            "Tags": [
+              "Furniture"
+            ]
+          }
+        },
+        {
+          "Name": "Table4",
+          "ClassName": "Part",
+          "Properties": {
+            "Anchored": true,
+            "Size": [
+              4,
+              2,
+              3
+            ],
+            "CFrame": {
+              "CFrame": {
+                "position": [
+                  7.5,
+                  1.4,
+                  -6.667
+                ],
+                "orientation": [
+                  [
+                    1,
+                    0,
+                    0
+                  ],
+                  [
+                    0,
+                    1,
+                    0
+                  ],
+                  [
+                    0,
+                    0,
+                    1
+                  ]
+                ]
+              }
+            },
+            "Color": [
+              0.85,
+              0.85,
+              0.8
+            ],
+            "Material": "Wood",
+            "TopSurface": "Smooth",
+            "BottomSurface": "Smooth",
+            "Tags": [
+              "Furniture"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "Name": "CashRegister",
+      "ClassName": "Part",
+      "Properties": {
+        "Anchored": true,
+        "Size": [
+          2,
+          1.2,
+          1.5
+        ],
+        "CFrame": {
+          "CFrame": {
+            "position": [
+              2.5,
+              4.0,
+              7.0
+            ],
+            "orientation": [
+              [
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0
+              ],
+              [
+                0,
+                0,
+                1
+              ]
+            ]
+          }
+        },
+        "Color": [
+          0.2,
+          0.6,
+          0.3
+        ],
+        "Material": "SmoothPlastic",
+        "TopSurface": "Smooth",
+        "BottomSurface": "Smooth",
+        "Tags": [
+          "CashRegister"
+        ]
+      }
+    },
+    {
+      "Name": "Guards",
+      "ClassName": "Folder",
+      "Children": [
+        {
+          "Name": "Gunner",
+          "ClassName": "Model",
+          "Properties": {
+            "Tags": [
+              "Guard"
+            ],
+            "Attributes": {
+              "Attributes": {
+                "DefenderType": {
+                  "String": "Gunner"
+                }
+              }
+            }
+          },
+          "Children": [
+            {
+              "Name": "HumanoidRootPart",
+              "ClassName": "Part",
+              "Properties": {
+                "Anchored": true,
+                "Size": [
+                  2,
+                  5,
+                  1
+                ],
+                "CFrame": {
+                  "CFrame": {
+                    "position": [
+                      -11.0,
+                      2.9,
+                      7.5
+                    ],
+                    "orientation": [
+                      [
+                        -1,
+                        0,
+                        0
+                      ],
+                      [
+                        0,
+                        1,
+                        0
+                      ],
+                      [
+                        0,
+                        0,
+                        -1
+                      ]
+                    ]
+                  }
+                },
+                "Color": [
+                  0.15,
+                  0.2,
+                  0.45
+                ],
+                "Material": "SmoothPlastic",
+                "TopSurface": "Smooth",
+                "BottomSurface": "Smooth"
+              },
+              "Children": [
+                {
+                  "Name": "Muzzle",
+                  "ClassName": "Attachment",
+                  "Properties": {
+                    "CFrame": {
+                      "CFrame": {
+                        "position": [
+                          0.8,
+                          1.2,
+                          -0.8
+                        ],
+                        "orientation": [
+                          [
+                            1,
+                            0,
+                            0
+                          ],
+                          [
+                            0,
+                            1,
+                            0
+                          ],
+                          [
+                            0,
+                            0,
+                            1
+                          ]
+                        ]
+                      }
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "Name": "Head",
+              "ClassName": "Part",
+              "Properties": {
+                "Anchored": true,
+                "Size": [
+                  1.2,
+                  1.2,
+                  1.2
+                ],
+                "CFrame": {
+                  "CFrame": {
+                    "position": [
+                      -11.0,
+                      6.0,
+                      7.5
+                    ],
+                    "orientation": [
+                      [
+                        -1,
+                        0,
+                        0
+                      ],
+                      [
+                        0,
+                        1,
+                        0
+                      ],
+                      [
+                        0,
+                        0,
+                        -1
+                      ]
+                    ]
+                  }
+                },
+                "Color": [
+                  0.95,
+                  0.8,
+                  0.65
+                ],
+                "Material": "SmoothPlastic",
+                "TopSurface": "Smooth",
+                "BottomSurface": "Smooth"
+              }
+            }
+          ]
+        },
+        {
+          "Name": "CeilingTurret1",
+          "ClassName": "Model",
+          "Properties": {
+            "Tags": [
+              "Turret"
+            ],
+            "Attributes": {
+              "Attributes": {
+                "DefenderType": {
+                  "String": "CeilingTurret"
+                }
+              }
+            }
+          },
+          "Children": [
+            {
+              "Name": "Head",
+              "ClassName": "Part",
+              "Properties": {
+                "Anchored": true,
+                "Size": [
+                  1.6,
+                  1,
+                  1.6
+                ],
+                "CFrame": {
+                  "CFrame": {
+                    "position": [
+                      0,
+                      11.6,
+                      -2
+                    ],
+                    "orientation": [
+                      [
+                        1,
+                        0,
+                        0
+                      ],
+                      [
+                        0,
+                        1,
+                        0
+                      ],
+                      [
+                        0,
+                        0,
+                        1
+                      ]
+                    ]
+                  }
+                },
+                "Color": [
+                  0.1,
+                  0.1,
+                  0.1
+                ],
+                "Material": "Metal",
+                "TopSurface": "Smooth",
+                "BottomSurface": "Smooth"
+              },
+              "Children": [
+                {
+                  "Name": "Muzzle",
+                  "ClassName": "Attachment",
+                  "Properties": {
+                    "CFrame": {
+                      "CFrame": {
+                        "position": [
+                          0,
+                          0,
+                          -1
+                        ],
+                        "orientation": [
+                          [
+                            1,
+                            0,
+                            0
+                          ],
+                          [
+                            0,
+                            1,
+                            0
+                          ],
+                          [
+                            0,
+                            0,
+                            1
+                          ]
+                        ]
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

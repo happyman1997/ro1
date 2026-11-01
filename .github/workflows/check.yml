@@ -1,5 +1,6 @@
 # Проверка кода на каждый пуш и пулл-реквест:
-#   rojo build      — проект собирается в файл места
+#   rojo build      — проект собирается в файл места (его можно скачать: ro1-place)
+#   check_scene     — сцена соответствует договорённостям кода
 #   luau-lsp        — типы в строгом режиме с описаниями API Roblox + линтер
 #   StyLua          — форматирование по stylua.toml
 #   selene          — линтер для Roblox
@@ -50,8 +51,23 @@ jobs:
       # Следующие шаги выполняются, даже если предыдущая проверка упала:
       # так за один запуск видны все проблемы сразу.
       - name: Сборка (rojo build)
+        id: build
         if: ${{ !cancelled() }}
         run: rojo build default.project.json -o "$RUNNER_TEMP/ro1.rbxlx"
+
+      - name: Проверка сцены
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        run: python3 tools/check_scene.py "$RUNNER_TEMP/ro1.rbxlx"
+
+      # Готовый файл места: Actions → запуск → Artifacts → ro1-place.
+      - name: Файл места для Studio
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        uses: actions/upload-artifact@v5
+        with:
+          name: ro1-place
+          path: ${{ runner.temp }}/ro1.rbxlx
+          if-no-files-found: error
+          retention-days: 30
 
       - name: Типы и линтер (luau-lsp)
         if: ${{ !cancelled() }}
