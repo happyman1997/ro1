@@ -1,0 +1,19 @@
+# Файлы блокировки Studio
+*.rbxl.lock
+*.rbxlx.lock
+
+# Сборки rojo build
+/build/
+
+# Генерируемые файлы инструментов
+sourcemap.json
+roblox.yml
+roblox_standard_library.toml
+
+# Пакеты Wally (если появятся)
+/Packages/
+/ServerPackages/
+
+# Системный мусор
+.DS_Store
+Thumbs.db
