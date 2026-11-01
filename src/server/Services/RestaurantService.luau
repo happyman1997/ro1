@@ -85,7 +85,10 @@ local function setOperational(plot: Plot, state: State, value: boolean)
 		saveNeedsRepair(plot, true)
 		local owner = plot.owner
 		if owner then
-			NetService:notify(owner, "Ресторан остановлен: персонал убит или мебель сломана. Почините его.")
+			NetService:notify(
+				owner,
+				"Ресторан остановлен: персонал убит или мебель сломана. Почините его."
+			)
 		end
 	end
 end
@@ -110,7 +113,10 @@ local function onRestaurantBuilt(plot: Plot, restaurant: Model)
 	states[plot] = state
 	plot.model:SetAttribute("Operational", state.operational)
 	if owner and needsRepair then
-		NetService:notify(owner, "Ресторан всё ещё сломан и не приносит доход. Почините его.")
+		NetService:notify(
+			owner,
+			"Ресторан всё ещё сломан и не приносит доход. Почините его."
+		)
 	end
 end
 
@@ -170,10 +176,11 @@ function RestaurantService:Start()
 	task.spawn(function()
 		while true do
 			task.wait(INCOME_INTERVAL)
-			local ok, err = pcall(tickIncome)
-			if not ok then
-				warn(`[RestaurantService] Ошибка начисления дохода: {err}`)
-			end
+			xpcall(tickIncome, function(message: any)
+				warn(
+					`[RestaurantService] Ошибка начисления дохода: {message}\n{debug.traceback()}`
+				)
+			end)
 		end
 	end)
 end

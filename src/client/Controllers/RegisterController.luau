@@ -60,7 +60,9 @@ function RegisterController:Start()
 	Net.on("HackState", function(state: string, value: any)
 		if state == "Started" and typeof(value) == "number" then
 			local seconds = math.max(0, math.ceil(value - workspace:GetServerTimeNow()))
-			NotificationController:notify(`Взлом: {seconds} с. Не отходите от кассы и не доставайте оружие.`)
+			NotificationController:notify(
+				`Взлом: {seconds} с. Не отходите от кассы и не доставайте оружие.`
+			)
 		end
 	end)
 end

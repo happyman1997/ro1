@@ -39,9 +39,12 @@ function Loader.run(folder: Instance, label: string)
 	for _, entry in entries do
 		local init = entry.module.Init
 		if init then
-			local ok, err = xpcall(init, debug.traceback, entry.module)
-			if not ok then
-				error(`[{label}] {entry.name}:Init() завершился ошибкой:\n{err}`, 0)
+			local failure: string? = nil
+			xpcall(init, function(message: any)
+				failure = debug.traceback(tostring(message), 2)
+			end, entry.module)
+			if failure then
+				error(`[{label}] {entry.name}:Init() завершился ошибкой:\n{failure}`, 0)
 			end
 		end
 	end

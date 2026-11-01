@@ -177,8 +177,12 @@ local function assign(player: Player, data: DataTemplate.PlayerData)
 		if #plots == 0 then
 			return -- карта ещё не размечена (тест в пустом месте): играем без участка
 		end
-		warn("[PlotService] Нет свободных участков: Players.MaxPlayers должен быть не больше числа участков")
-		player:Kick("На сервере нет свободных участков. Зайдите на другой сервер.")
+		warn(
+			"[PlotService] Нет свободных участков: Players.MaxPlayers должен быть не больше числа участков"
+		)
+		player:Kick(
+			"На сервере нет свободных участков. Зайдите на другой сервер."
+		)
 		return
 	end
 

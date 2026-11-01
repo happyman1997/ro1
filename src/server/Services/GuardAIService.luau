@@ -120,7 +120,9 @@ local function onDefenderAdded(instance: Instance)
 	end
 	local plot = PlotService:getPlotFromInstance(model)
 	if plot == nil then
-		warn(`[GuardAI] {model:GetFullName()}: защитник должен стоять внутри модели участка`)
+		warn(
+			`[GuardAI] {model:GetFullName()}: защитник должен стоять внутри модели участка`
+		)
 		return
 	end
 
@@ -193,7 +195,10 @@ local function raiseAlarm(plot: Plot, player: Player, now: number)
 	local owner = plot.owner
 	if owner and now - (lastOwnerAlert[plot] or -math.huge) >= OWNER_ALERT_COOLDOWN then
 		lastOwnerAlert[plot] = now
-		NetService:notify(owner, `Тревога! Охрана атакует нарушителя: {player.DisplayName}`)
+		NetService:notify(
+			owner,
+			`Тревога! Охрана атакует нарушителя: {player.DisplayName}`
+		)
 	end
 end
 
@@ -224,7 +229,7 @@ local function collectCandidates(plot: Plot, now: number): { Candidate }
 		-- Разведчик без маскировки = взламывает кассу или раскрыт.
 		local blownCover = class.Disguise and not disguised
 
-		table.insert(candidates, {
+		local candidate: Candidate = {
 			player = player,
 			character = character,
 			root = root,
@@ -233,7 +238,8 @@ local function collectCandidates(plot: Plot, now: number): { Candidate }
 			matchesArmed = alarmed or armed or blownCover,
 			matchesIntruder = alarmed or not disguised,
 			threat = math.max(class.Threat, 0.1),
-		})
+		}
+		table.insert(candidates, candidate)
 	end
 	return candidates
 end
@@ -449,10 +455,9 @@ function GuardAIService:Start()
 		while true do
 			task.wait(SCAN_INTERVAL)
 			-- Ошибка в одном проходе не должна навсегда выключить охрану сервера.
-			local ok, err = pcall(scan)
-			if not ok then
-				warn(`[GuardAI] Ошибка прохода: {err}`)
-			end
+			xpcall(scan, function(message: any)
+				warn(`[GuardAI] Ошибка прохода: {message}\n{debug.traceback()}`)
+			end)
 		end
 	end)
 end

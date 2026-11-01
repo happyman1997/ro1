@@ -94,7 +94,11 @@ function NetService:Init()
 			-- Честный клиент сюда никогда не отправляет. «Ловушка» заодно не даёт
 			-- событиям копиться в очереди сервера (без обработчика они бы копились).
 			remote.OnServerEvent:Connect(function(player: Player)
-				NetService:flag(player, `отправка в серверное событие «{name}»`, NetService.Penalty.BadRequest)
+				NetService:flag(
+					player,
+					`отправка в серверное событие «{name}»`,
+					NetService.Penalty.BadRequest
+				)
 			end)
 		end
 	end
@@ -126,7 +130,11 @@ function NetService:on(name: string, options: HandlerOptions, handler: Handler)
 
 	remotes[name].OnServerEvent:Connect(function(player: Player, ...: any)
 		if not limiter:check(player) then
-			NetService:flag(player, `слишком частые запросы «{name}»`, NetService.Penalty.RateLimit)
+			NetService:flag(
+				player,
+				`слишком частые запросы «{name}»`,
+				NetService.Penalty.RateLimit
+			)
 			return
 		end
 
@@ -143,13 +151,19 @@ end
 
 -- Отправить событие одному игроку.
 function NetService:fireClient(player: Player, name: string, ...: any)
-	assert(getInfo(name).direction == "ToClient", `NetService: «{name}» — событие клиент → сервер`)
+	assert(
+		getInfo(name).direction == "ToClient",
+		`NetService: «{name}» — событие клиент → сервер`
+	)
 	remotes[name]:FireClient(player, ...)
 end
 
 -- Отправить событие всем игрокам.
 function NetService:fireAllClients(name: string, ...: any)
-	assert(getInfo(name).direction == "ToClient", `NetService: «{name}» — событие клиент → сервер`)
+	assert(
+		getInfo(name).direction == "ToClient",
+		`NetService: «{name}» — событие клиент → сервер`
+	)
 	remotes[name]:FireAllClients(...)
 end
 
@@ -181,8 +195,12 @@ function NetService:flag(player: Player, reason: string, penalty: number)
 
 	if entry.score >= SUSPICION_KICK_THRESHOLD then
 		suspicion[player] = nil
-		warn(`[Анти-чит] {player.Name} ({player.UserId}) кикнут: превышен порог подозрительности`)
-		player:Kick("Обнаружена подозрительная активность. Если это ошибка, просто перезайдите.")
+		warn(
+			`[Анти-чит] {player.Name} ({player.UserId}) кикнут: превышен порог подозрительности`
+		)
+		player:Kick(
+			"Обнаружена подозрительная активность. Если это ошибка, просто перезайдите."
+		)
 	end
 end
 

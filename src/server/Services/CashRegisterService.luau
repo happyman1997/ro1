@@ -236,7 +236,11 @@ end
 
 local function onCollect(plot: Plot, player: Player)
 	if not promptLimiter:check(player) then
-		NetService:flag(player, "слишком частое взаимодействие с кассой", NetService.Penalty.RateLimit)
+		NetService:flag(
+			player,
+			"слишком частое взаимодействие с кассой",
+			NetService.Penalty.RateLimit
+		)
 		return
 	end
 	if not PlotService:isOwner(plot, player) then
@@ -272,7 +276,11 @@ end
 
 local function onHackRequest(plot: Plot, player: Player)
 	if not promptLimiter:check(player) then
-		NetService:flag(player, "слишком частое взаимодействие с кассой", NetService.Penalty.RateLimit)
+		NetService:flag(
+			player,
+			"слишком частое взаимодействие с кассой",
+			NetService.Penalty.RateLimit
+		)
 		return
 	end
 	if PlotService:isOwner(plot, player) then
@@ -299,19 +307,30 @@ local function onHackRequest(plot: Plot, player: Player)
 		return
 	end
 	if not ClassService:isDisguised(player) then
-		NetService:notify(player, "Нужна маскировка: уберите оружие и дождитесь конца раскрытия")
+		NetService:notify(
+			player,
+			"Нужна маскировка: уберите оружие и дождитесь конца раскрытия"
+		)
 		return
 	end
 
 	local now = os.clock()
 	local registerWait = (registerCooldownUntil[plot] or 0) - now
 	if registerWait > 0 then
-		NetService:notify(player, `Касса недавно взломана, защита снимется через {math.ceil(registerWait)} с`)
+		NetService:notify(
+			player,
+			`Касса недавно взломана, защита снимется через {math.ceil(
+				registerWait
+			)} с`
+		)
 		return
 	end
 	local thiefWait = (thiefCooldownUntil[player] or 0) - now
 	if thiefWait > 0 then
-		NetService:notify(player, `Следующий взлом будет доступен через {math.ceil(thiefWait)} с`)
+		NetService:notify(
+			player,
+			`Следующий взлом будет доступен через {math.ceil(thiefWait)} с`
+		)
 		return
 	end
 	if math.floor((cash[plot] or 0) * STEAL_FRACTION) < MIN_LOOT then
@@ -430,7 +449,9 @@ function CashRegisterService:Start()
 	PlotService:onRestaurantBuilt(setupRegister)
 
 	PlotService.RestaurantRemoving:Connect(function(plot: Plot)
-		local reason = if plot.owner then "ресторан перестроен" else "владелец покинул игру"
+		local reason = if plot.owner
+			then "ресторан перестроен"
+			else "владелец покинул игру"
 		cancelHack(plot, reason, false)
 		removeRegister(plot)
 	end)
@@ -453,10 +474,9 @@ function CashRegisterService:Start()
 	task.spawn(function()
 		while true do
 			task.wait(HACK_TICK)
-			local ok, err = pcall(updateHacks)
-			if not ok then
-				warn(`[CashRegister] Ошибка обновления взломов: {err}`)
-			end
+			xpcall(updateHacks, function(message: any)
+				warn(`[CashRegister] Ошибка обновления взломов: {message}\n{debug.traceback()}`)
+			end)
 		end
 	end)
 end

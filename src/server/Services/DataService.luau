@@ -70,7 +70,8 @@ type Session = {
 }
 
 type Transform = (old: any) -> (any, { number }?)
-type UpdateAsync = (key: string, transform: Transform) -> ()
+-- Возвращает новое значение записи (результат нам не нужен, но с ним pcall типизируется проще).
+type UpdateAsync = (key: string, transform: Transform) -> any
 
 type AcquireProblem = "left" | "corrupt" | "error"
 type WriteResult = "ok" | "lost" | "error"
@@ -182,11 +183,12 @@ end
 -- как настоящий DataStore, чтобы поведение не отличалось.
 local function createMemoryStore(): UpdateAsync
 	local memory: { [string]: any } = {}
-	return function(key: string, transform: Transform)
+	return function(key: string, transform: Transform): any
 		local newValue = transform(deepCopy(memory[key]))
 		if newValue ~= nil then
 			memory[key] = deepCopy(newValue)
 		end
+		return newValue
 	end
 end
 
@@ -207,7 +209,7 @@ local function acquire(player: Player, key: string): (Record?, AcquireProblem?)
 		local acquired: Record? = nil
 		local corrupt = false
 
-		local ok, err = pcall(updateAsync, key, function(old: any)
+		local ok, err = pcall(updateAsync, key, function(old: any): (Record?, { number }?)
 			-- UpdateAsync может вызвать функцию несколько раз — сбрасываем флаги.
 			acquired = nil
 			corrupt = false
@@ -252,7 +254,7 @@ local function writeRecord(userId: number, key: string, data: any, release: bool
 	for attempt = 1, SAVE_ATTEMPTS do
 		local lost = false
 
-		local ok, err = pcall(updateAsync, key, function(old: any)
+		local ok, err = pcall(updateAsync, key, function(old: any): (Record?, { number }?)
 			lost = false
 			local lock = if type(old) == "table" then old.Lock else nil
 			if type(lock) ~= "table" or lock.ServerId ~= SERVER_ID then
@@ -328,12 +330,18 @@ local function saveSession(player: Player, session: Session, release: boolean)
 		if sessions[player] == session then
 			sessions[player] = nil
 		end
-		warn(`[DataService] Данные {player.Name} захвачены другим сервером — сессия закрыта без сохранения`)
+		warn(
+			`[DataService] Данные {player.Name} захвачены другим сервером — сессия закрыта без сохранения`
+		)
 		if player.Parent == Players then
-			player:Kick("Ваши данные открыты на другом сервере. Перезайдите в игру.")
+			player:Kick(
+				"Ваши данные открыты на другом сервере. Перезайдите в игру."
+			)
 		end
 	elseif result == "error" and release then
-		warn(`[DataService] Не удалось сохранить {player.Name} при выходе: потерян прогресс с последнего автосохранения`)
+		warn(
+			`[DataService] Не удалось сохранить {player.Name} при выходе: потерян прогресс с последнего автосохранения`
+		)
 	end
 end
 
@@ -349,13 +357,11 @@ local function releasePlayer(player: Player)
 	local userId = player.UserId
 	releasingUserIds[userId] = true
 	pendingOperations += 1
-	local ok, err = pcall(saveSession, player, session, true)
+	xpcall(saveSession, function(message: any)
+		warn(`[DataService] Ошибка при закрытии сессии {player.Name}: {message}`)
+	end, player, session, true)
 	pendingOperations -= 1
 	releasingUserIds[userId] = nil
-
-	if not ok then
-		warn(`[DataService] Ошибка при закрытии сессии {player.Name}: {err}`)
-	end
 end
 
 local function kickWithReason(player: Player, problem: string)
@@ -364,7 +370,9 @@ local function kickWithReason(player: Player, problem: string)
 	end
 	local message = if problem == "newer"
 		then "Этот сервер устарел. Перезайдите, чтобы попасть на обновлённый сервер."
-		elseif problem == "corrupt" then "Ошибка в ваших сохранённых данных. Сообщите разработчику."
+		elseif
+			problem == "corrupt"
+		then "Ошибка в ваших сохранённых данных. Сообщите разработчику."
 		else "Не удалось загрузить ваши данные. Пожалуйста, перезайдите через минуту."
 	player:Kick(message)
 end
@@ -415,11 +423,10 @@ end
 -- Запустить функцию, учитывая её в pendingOperations (BindToClose ждёт их завершения).
 local function track(callback: (Player) -> (), player: Player)
 	pendingOperations += 1
-	local ok, err = pcall(callback, player)
+	xpcall(callback, function(message: any)
+		warn(`[DataService] Ошибка для {player.Name}: {message}`)
+	end, player)
 	pendingOperations -= 1
-	if not ok then
-		warn(`[DataService] Ошибка для {player.Name}: {err}`)
-	end
 end
 
 --------------------------------------------------------------------------------
@@ -450,7 +457,9 @@ end
 function DataService:set(player: Player, key: string, value: any)
 	local session = sessions[player]
 	if session == nil then
-		warn(`[DataService] set("{key}") для {player.Name}: данные не загружены, изменение отброшено`)
+		warn(
+			`[DataService] set("{key}") для {player.Name}: данные не загружены, изменение отброшено`
+		)
 		return
 	end
 	if key == "Version" or (DataTemplate.Template :: any)[key] == nil then
@@ -474,7 +483,9 @@ end
 function DataService:increment(player: Player, key: string, delta: number): number?
 	local data = self:get(player) :: any
 	if data == nil then
-		warn(`[DataService] increment("{key}") для {player.Name}: данные не загружены, изменение отброшено`)
+		warn(
+			`[DataService] increment("{key}") для {player.Name}: данные не загружены, изменение отброшено`
+		)
 		return nil
 	end
 	local current = data[key]
@@ -491,7 +502,9 @@ end
 function DataService:update(player: Player, key: string, transform: (current: any) -> any)
 	local data = self:get(player) :: any
 	if data == nil then
-		warn(`[DataService] update("{key}") для {player.Name}: данные не загружены, изменение отброшено`)
+		warn(
+			`[DataService] update("{key}") для {player.Name}: данные не загружены, изменение отброшено`
+		)
 		return
 	end
 	self:set(player, key, transform(data[key]))
@@ -516,8 +529,8 @@ function DataService:Init()
 
 	if usable then
 		local dataStore = store :: DataStore
-		updateAsync = function(key: string, transform: Transform)
-			dataStore:UpdateAsync(key, transform :: any)
+		updateAsync = function(key: string, transform: Transform): any
+			return dataStore:UpdateAsync(key, transform :: any)
 		end
 	elseif RunService:IsStudio() then
 		warn(

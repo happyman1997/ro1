@@ -33,7 +33,11 @@ function SettingsService:Start()
 		burst = 10,
 	}, function(player: Player, name: string, value: unknown)
 		if not RULES[name](value) then
-			NetService:flag(player, `недопустимое значение настройки «{name}»`, NetService.Penalty.BadRequest)
+			NetService:flag(
+				player,
+				`недопустимое значение настройки «{name}»`,
+				NetService.Penalty.BadRequest
+			)
 			return
 		end
 		if not DataService:isLoaded(player) then

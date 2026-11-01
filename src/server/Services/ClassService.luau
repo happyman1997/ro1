@@ -40,7 +40,8 @@ local lastChangeAt: { [Player]: number } = {}
 -- Публичный API
 --------------------------------------------------------------------------------
 
-function ClassService:getClassId(player: Player): string
+-- Логика — в локальных функциях: так методы не зависят от вывода типа self.
+local function getClassId(player: Player): string
 	local data = DataService:get(player)
 	local id = if data then data.Class else nil
 	if id ~= nil and Classes[id] ~= nil then
@@ -49,12 +50,24 @@ function ClassService:getClassId(player: Player): string
 	return DEFAULT_CLASS
 end
 
+local function getClass(player: Player): Classes.ClassInfo
+	return Classes[getClassId(player)]
+end
+
+local function isExposed(player: Player): boolean
+	return (exposedUntil[player] or 0) > os.clock()
+end
+
+function ClassService:getClassId(player: Player): string
+	return getClassId(player)
+end
+
 function ClassService:getClass(player: Player): Classes.ClassInfo
-	return Classes[self:getClassId(player)]
+	return getClass(player)
 end
 
 function ClassService:canHack(player: Player): boolean
-	return self:getClass(player).CanHack
+	return getClass(player).CanHack
 end
 
 function ClassService:isHacking(player: Player): boolean
@@ -63,12 +76,16 @@ end
 
 -- Вызывает CashRegisterService при начале и конце взлома.
 function ClassService:setHacking(player: Player, value: boolean)
-	hacking[player] = if value then true else nil
+	if value then
+		hacking[player] = true
+	else
+		hacking[player] = nil
+	end
 	player:SetAttribute("Hacking", value)
 end
 
 function ClassService:isExposed(player: Player): boolean
-	return (exposedUntil[player] or 0) > os.clock()
+	return isExposed(player)
 end
 
 -- Раскрыть маскировку на duration секунд (более короткое раскрытие не сокращает текущее).
@@ -82,13 +99,13 @@ function ClassService:expose(player: Player, duration: number, reason: string)
 	exposedUntil[player] = untilTime
 	-- Время сервера (GetServerTimeNow) понятно клиенту — для таймера в интерфейсе.
 	player:SetAttribute("ExposedUntil", workspace:GetServerTimeNow() + duration)
-	if self:getClass(player).Disguise then
+	if getClass(player).Disguise then
 		NetService:notify(player, `Маскировка раскрыта: {reason}`)
 	end
 end
 
 function ClassService:isDisguised(player: Player): boolean
-	if not self:getClass(player).Disguise or hacking[player] or self:isExposed(player) then
+	if not getClass(player).Disguise or hacking[player] == true or isExposed(player) then
 		return false
 	end
 	return CharacterUtil.getEquippedWeapon(player.Character) == nil
@@ -99,8 +116,8 @@ end
 --------------------------------------------------------------------------------
 
 local function setClassAttributes(player: Player)
-	local class = ClassService:getClass(player)
-	player:SetAttribute("Class", ClassService:getClassId(player))
+	local class = getClass(player)
+	player:SetAttribute("Class", getClassId(player))
 	player:SetAttribute("CanHack", class.CanHack)
 end
 
@@ -113,7 +130,7 @@ local function applyStats(player: Player, keepHealthFraction: boolean)
 	if humanoid == nil then
 		return
 	end
-	local class = ClassService:getClass(player)
+	local class = getClass(player)
 	local fraction = if keepHealthFraction and humanoid.MaxHealth > 0 then humanoid.Health / humanoid.MaxHealth else 1
 	humanoid.MaxHealth = class.MaxHealth
 	humanoid.Health = class.MaxHealth * fraction
@@ -132,7 +149,7 @@ local function onCharacterAdded(player: Player, character: Model)
 
 	-- Оружие в руках: Tool появился в модели персонажа (на сервере).
 	character.ChildAdded:Connect(function(child: Instance)
-		if CharacterUtil.isWeapon(child) and ClassService:getClass(player).Disguise then
+		if CharacterUtil.isWeapon(child) and getClass(player).Disguise then
 			ClassService:expose(player, DRAW_EXPOSE_DURATION, "оружие в руках")
 		end
 	end)
@@ -165,7 +182,7 @@ function ClassService:Start()
 		rate = 1,
 		burst = 3,
 	}, function(player: Player, classId: string)
-		if not DataService:isLoaded(player) or classId == ClassService:getClassId(player) then
+		if not DataService:isLoaded(player) or classId == getClassId(player) then
 			return
 		end
 		if hacking[player] then
@@ -182,7 +199,10 @@ function ClassService:Start()
 		local plot = PlotService:getPlot(player)
 		local _, _, root = CharacterUtil.getAlive(player)
 		if plot == nil or root == nil or not PlotService:isInTerritory(plot, root.Position) then
-			NetService:notify(player, "Сменить класс можно только на территории своего ресторана")
+			NetService:notify(
+				player,
+				"Сменить класс можно только на территории своего ресторана"
+			)
 			return
 		end
 
