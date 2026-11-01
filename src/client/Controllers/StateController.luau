@@ -7,8 +7,8 @@
 	не читает, а интерфейс просто покажет неправду.
 
 	Пример (из UI или другого контроллера):
-		local stop = StateController:observe("Coins", function(coins)
-			label.Text = `Монеты: {coins}`
+		local stop = StateController:observe("Cash", function(cash)
+			label.Text = `${cash}`
 		end)
 		-- stop() — отписаться
 ]]

@@ -20,8 +20,8 @@
 	to API Services) используется временное хранилище в памяти.
 
 	Пример использования в другом сервисе:
-		DataService:onLoaded(function(player, data) print(data.Coins) end)
-		DataService:increment(player, "Coins", 10)
+		DataService:onLoaded(function(player, data) print(data.Cash) end)
+		DataService:increment(player, "Cash", 10)
 		DataService:update(player, "Settings", function(settings)
 			settings.ShowTips = false
 			return settings

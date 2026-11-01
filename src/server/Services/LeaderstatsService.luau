@@ -10,7 +10,7 @@
 local DataService = require(script.Parent.DataService)
 
 -- Какие числовые поля данных показывать (в этом порядке).
-local SHOWN_KEYS = { "Coins" }
+local SHOWN_KEYS = { "Cash" }
 
 local LeaderstatsService = {}
 

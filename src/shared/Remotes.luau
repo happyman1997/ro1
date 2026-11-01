@@ -18,6 +18,10 @@
 
 	RemoteFunction сознательно не используем: InvokeClient позволяет клиенту
 	«подвесить» серверный поток навсегда. Запрос с ответом делается парой событий.
+
+	Взаимодействие с кассой идёт через ProximityPrompt, а не через Remote.
+	Для сервера это такой же ввод от клиента и проверяется так же строго
+	(см. CashRegisterService).
 ]]
 
 export type Direction = "ToClient" | "ToServer"
@@ -27,9 +31,21 @@ export type RemoteInfo = { direction: Direction, kind: Kind }
 local Remotes: { [string]: RemoteInfo } = {
 	-- Данные игрока: полный снимок при входе ("Full", data) и изменения ("Set", key, value).
 	DataSync = { direction = "ToClient", kind = "Reliable" },
+	-- Текстовое уведомление игроку: (text).
+	Notify = { direction = "ToClient", kind = "Reliable" },
+	-- Состояние взлома для вора: ("Started", endsAtServerTime) | ("Ended", success).
+	HackState = { direction = "ToClient", kind = "Reliable" },
+	-- Выстрел охраны для эффекта трассера: (origin: Vector3, impact: Vector3).
+	DefenderFired = { direction = "ToClient", kind = "Unreliable" },
 
 	-- Игрок меняет свою настройку: (имя настройки, значение).
 	ChangeSetting = { direction = "ToServer", kind = "Reliable" },
+	-- Выбор класса: (classId). Только на территории своего ресторана.
+	SelectClass = { direction = "ToServer", kind = "Reliable" },
+	-- Улучшить ресторан до следующего уровня: ().
+	UpgradeRestaurant = { direction = "ToServer", kind = "Reliable" },
+	-- Оплатить ремонт после штурма: ().
+	RepairRestaurant = { direction = "ToServer", kind = "Reliable" },
 }
 
 for _, info in Remotes do

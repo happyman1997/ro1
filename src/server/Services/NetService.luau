@@ -153,6 +153,13 @@ function NetService:fireAllClients(name: string, ...: any)
 	remotes[name]:FireAllClients(...)
 end
 
+-- Показать игроку текстовое уведомление (обрабатывает NotificationController).
+function NetService:notify(player: Player, text: string)
+	if player.Parent == Players then
+		remotes.Notify:FireClient(player, text)
+	end
+end
+
 -- Засчитать игроку подозрительное действие. При превышении порога — кик.
 -- Используйте и в своих сервисах: например, если игрок «купил» товар
 -- из магазина, до которого 500 студов.

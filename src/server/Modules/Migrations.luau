@@ -7,16 +7,15 @@
 	недостающими полями из шаблона, поэтому для ПРОСТОГО ДОБАВЛЕНИЯ поля
 	миграция не нужна.
 
-	Пример: переименовали Coins в Gold (версия 1 → 2).
-		[1] = function(data)
-			data.Gold = data.Coins
-			data.Coins = nil
-		end,
-	и в DataTemplate поставили Version = 2.
-
 	Миграции не удаляйте, пока в DataStore могут лежать старые сохранения.
 ]]
 
-local Migrations: { [number]: (data: { [string]: any }) -> () } = {}
+local Migrations: { [number]: (data: { [string]: any }) -> () } = {
+	-- 1 → 2: валюта каркаса Coins переименована в Cash.
+	[1] = function(data)
+		data.Cash = if type(data.Coins) == "number" then data.Coins else 0
+		data.Coins = nil
+	end,
+}
 
 return Migrations

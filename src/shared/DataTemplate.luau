@@ -1,10 +1,14 @@
 --!strict
 --[[
-	Шаблон данных игрока — то, что сохраняется в DataStore.
+	Шаблон данных игрока — то, что сохраняется в DataStore (одна запись на игрока).
 
 	Модуль лежит в Shared, чтобы клиент знал форму данных (типы для интерфейса).
 	Значения по умолчанию не секретны. Изменять данные может ТОЛЬКО сервер
 	через DataService.
+
+	Что НЕ хранится здесь (живёт только в памяти сервера, см. docs/ARCHITECTURE.md):
+	деньги в кассе, сломанная мебель, убитый персонал, тревога охраны,
+	раскрытие стелса, номер участка. Это состояние текущей сессии.
 
 	Как добавить поле:
 		1. Добавьте его в тип PlayerData и в Template ниже. Старые сохранения
@@ -31,11 +35,27 @@ export type Stats = {
 	FirstJoin: number, -- os.time() первого входа
 	LastJoin: number, -- os.time() последнего входа
 	Logins: number, -- сколько раз заходил
+	Robberies: number, -- успешных взломов чужих касс
+	TimesRobbed: number, -- сколько раз взломали его кассу
+	CashStolen: number, -- всего украдено
+}
+
+export type RestaurantData = {
+	Tier: number, -- текущий уровень ресторана (1..#Tiers)
+	NeedsRepair: boolean, -- ресторан сломан; сохраняется, чтобы перезаход не чинил его бесплатно
+	Defense: { [string]: string }, -- SlotId слота → DefenderType нанятого защитника
+}
+
+export type Equipment = {
+	Weapons: { [string]: number }, -- id купленного оружия → уровень прокачки
 }
 
 export type PlayerData = {
 	Version: number,
-	Coins: number,
+	Cash: number, -- кошелёк игрока (деньги из кассы зачисляются сюда)
+	Class: string, -- ключ из Config/Classes
+	Restaurant: RestaurantData,
+	Equipment: Equipment,
 	Settings: Settings,
 	Stats: Stats,
 }
@@ -53,11 +73,22 @@ end
 local DataTemplate = {}
 
 -- Текущая версия формата данных (см. Migrations).
-DataTemplate.Version = 1
+DataTemplate.Version = 2
 
 DataTemplate.Template = deepFreeze({
 	Version = DataTemplate.Version,
-	Coins = 0,
+	Cash = 0,
+	Class = "Assault",
+	Restaurant = {
+		Tier = 1,
+		NeedsRepair = false,
+		Defense = {},
+	},
+	Equipment = {
+		Weapons = {
+			Pistol = 1, -- стартовое оружие, есть у всех
+		},
+	},
 	Settings = {
 		MusicVolume = 0.5,
 		ShowTips = true,
@@ -66,6 +97,9 @@ DataTemplate.Template = deepFreeze({
 		FirstJoin = 0,
 		LastJoin = 0,
 		Logins = 0,
+		Robberies = 0,
+		TimesRobbed = 0,
+		CashStolen = 0,
 	},
 } :: PlayerData)
 
