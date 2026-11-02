@@ -23,6 +23,7 @@ local Color3 = roblox.Color3
 local Enum = roblox.Enum
 local UDim = roblox.UDim
 local UDim2 = roblox.UDim2
+local Vector2 = roblox.Vector2
 
 local World = {}
 World.__index = World
@@ -57,7 +58,31 @@ local SUPER = {
 	LocalScript = "Script",
 	BaseScript = "LuaSourceContainer",
 	LuaSourceContainer = "Instance",
+	Frame = "GuiObject",
+	TextLabel = "GuiObject",
+	TextButton = "GuiObject",
+	TextBox = "GuiObject",
+	ImageLabel = "GuiObject",
+	ImageButton = "GuiObject",
+	ScrollingFrame = "GuiObject",
+	GuiObject = "GuiBase2d",
+	ScreenGui = "LayerCollector",
+	BillboardGui = "LayerCollector",
+	LayerCollector = "GuiBase2d",
+	GuiBase2d = "Instance",
+	UICorner = "UIComponent",
+	UIListLayout = "UIComponent",
+	UIGridLayout = "UIComponent",
+	UIPadding = "UIComponent",
+	UIStroke = "UIComponent",
+	UISizeConstraint = "UIComponent",
+	UIAspectRatioConstraint = "UIComponent",
+	UIComponent = "Instance",
 }
+
+-- Классы, которым симулятор разрешает любые свойства (интерфейс, камера, мышь):
+-- их внешний вид тесты не проверяют, важны только логика и тексты.
+local LENIENT = { GuiBase2d = true, UIComponent = true, Camera = true, PlayerGui = true, Mouse = true }
 
 local function superOf(className: string): string?
 	if className == "Instance" then
@@ -125,6 +150,13 @@ local PROPS = {
 		BorderSizePixel = 1,
 	},
 	UICorner = { CornerRadius = UDim.new() },
+	GuiObject = { Visible = true, Active = true, LayoutOrder = 0 },
+	TextLabel = { Text = "" },
+	TextButton = { Text = "" },
+	ScreenGui = { Enabled = true, ResetOnSpawn = true },
+	Players = { LocalPlayer = NIL },
+	Workspace = { CurrentCamera = NIL },
+	Camera = { FieldOfView = 70, CFrame = CFrame.new() },
 	DataModel = { PlaceId = 0, GameId = 0, JobId = "" },
 }
 
@@ -162,6 +194,13 @@ local EVENTS = {
 	Died = true,
 	Touched = true,
 	Changed = true,
+	Activated = true,
+	MouseButton1Click = true,
+	Equipped = true,
+	Unequipped = true,
+	AncestryChanged = true,
+	InputBegan = true,
+	InputEnded = true,
 }
 
 -- Правильный CFrame.lookAt (в Lune 0.10 он считается неверно).
@@ -208,6 +247,8 @@ function World.new(place, options: { verbose: boolean? }?)
 	self.partsCache = nil
 	self.partsCacheVersion = -1
 	self.closeHandlers = {}
+	self.coreCalls = {} -- вызовы StarterGui:SetCore с клиента (уведомления)
+	self.clientPlayer = nil
 	self.random = 0
 	self:_buildTask()
 	self:_buildEnv()
@@ -328,9 +369,10 @@ end
 -- Сигналы
 --------------------------------------------------------------------------------
 
-function World:_signal()
+function World:_signal(buffered: boolean?)
 	local world = self
 	local handlers = {}
+	local queue = {} -- события до первого обработчика (только для buffered)
 	local signal = {}
 	function signal:Connect(fn)
 		local connection = { Connected = true }
@@ -338,6 +380,13 @@ function World:_signal()
 			connection.Connected = false
 		end
 		table.insert(handlers, { fn = fn, connection = connection })
+		if buffered and #queue > 0 then
+			local pending = queue
+			queue = {}
+			for _, args in pending do
+				world.task.spawn(fn, table.unpack(args, 1, args.n))
+			end
+		end
 		return connection
 	end
 	function signal:Once(fn)
@@ -359,6 +408,10 @@ function World:_signal()
 	end
 	-- Внутреннее: игра этот метод не вызывает.
 	function signal:_fire(...)
+		if buffered and #handlers == 0 then
+			table.insert(queue, table.pack(...))
+			return
+		end
 		for _, handler in table.clone(handlers) do
 			if handler.connection.Connected then
 				world.task.spawn(handler.fn, ...)
@@ -378,7 +431,7 @@ function World:_event(instance, name: string)
 	local st = self.state[instance]
 	local signal = st.events[name]
 	if signal == nil then
-		signal = self:_signal()
+		signal = self:_signal(name == "OnClientEvent")
 		st.events[name] = signal
 	end
 	return signal
@@ -410,6 +463,17 @@ local function findInChain(className: string, tableByClass, key)
 		current = superOf(current)
 	end
 	return nil, nil
+end
+
+function World:_isLenient(className: string): boolean
+	local current: string? = className
+	while current do
+		if LENIENT[current] then
+			return true
+		end
+		current = superOf(current)
+	end
+	return false
 end
 
 function World:_isA(instance, className: string): boolean
@@ -613,6 +677,9 @@ function World:_new(className: string)
 					return child
 				end
 			end
+			if world:_isLenient(st.ClassName) then
+				return nil
+			end
 			error(`{key} is not a valid member of {st.ClassName} "{st.Name}"`, 2)
 		end,
 		__newindex = function(instance, key, value)
@@ -630,7 +697,7 @@ function World:_new(className: string)
 				return
 			end
 			local _, owner = findInChain(st.ClassName, PROPS, key)
-			if owner == nil then
+			if owner == nil and not world:_isLenient(st.ClassName) then
 				error(`{key} is not a valid member of {st.ClassName} "{st.Name}"`, 2)
 			end
 			st.props[key] = value
@@ -909,19 +976,32 @@ METHODS.Player = {
 		world.kicked[self] = message or ""
 		world:removePlayer(self)
 	end,
+	GetMouse = function(world)
+		return world.mouse
+	end,
+}
+
+METHODS.StarterGui = {
+	SetCore = function(world, _self, name, data)
+		table.insert(world.coreCalls, { name = name, data = data })
+	end,
 }
 
 METHODS.BaseRemoteEvent = {
 	FireClient = function(world, self, player, ...)
 		table.insert(world.sent, { remote = self.Name, player = player, args = table.pack(...) })
-	end,
-	FireAllClients = function(world, self, ...)
-		for _, player in world.Players:GetPlayers() do
-			table.insert(world.sent, { remote = self.Name, player = player, args = table.pack(...) })
+		if world.clientPlayer == player then
+			world:_event(self, "OnClientEvent"):_fire(...)
 		end
 	end,
-	FireServer = function()
-		error("FireServer вызывается только на клиенте")
+	FireAllClients = function(_world, self, ...)
+		for _, player in _world.Players:GetPlayers() do
+			self:FireClient(player, ...)
+		end
+	end,
+	FireServer = function(world, self, ...)
+		assert(world.clientPlayer, "FireServer: клиент не запущен (world:startClient)")
+		world:_event(self, "OnServerEvent"):_fire(world.clientPlayer, ...)
 	end,
 }
 
@@ -1271,6 +1351,7 @@ function World:_buildEnv()
 		Enum = Enum,
 		UDim = UDim,
 		UDim2 = UDim2,
+		Vector2 = Vector2,
 		Random = { new = newRandom },
 		RaycastParams = { new = newRaycastParams },
 	}
@@ -1314,6 +1395,53 @@ function World:start()
 		end
 	end
 	self:advance(0)
+end
+
+-- Запустить клиентский код за игрока (один клиент на мир). События, отправленные
+-- этому игроку раньше, доставляются по очереди, как в Roblox.
+function World:startClient(player)
+	assert(self.clientPlayer == nil, "клиент уже запущен")
+	self.clientPlayer = player
+	self.state[self.Players].props.LocalPlayer = player
+	local playerGui = self:_new("PlayerGui")
+	self.state[playerGui].Name = "PlayerGui"
+	playerGui.Parent = player
+	local camera = self:_new("Camera")
+	self.state[camera].Name = "Camera"
+	camera.Parent = self.workspace
+	self.state[self.workspace].props.CurrentCamera = camera
+	self.mouse = self:_new("Mouse")
+	self.mouse.Hit = CFrame.new()
+
+	local replicated = self.game:GetService("ReplicatedStorage")
+	for _, event in self.sent do
+		if event.player == player then
+			local remote = replicated.Remotes:FindFirstChild(event.remote)
+			if remote then
+				self:_event(remote, "OnClientEvent"):_fire(table.unpack(event.args, 1, event.args.n))
+			end
+		end
+	end
+
+	local client = self.game:GetService("StarterPlayer").StarterPlayerScripts.Client
+	for _, instance in client:GetDescendants() do
+		if self.state[instance].ClassName == "LocalScript" then
+			self.task.spawn(self:_load(instance))
+		end
+	end
+	self:advance(0)
+	return playerGui
+end
+
+-- Нажать кнопку интерфейса (или активировать инструмент).
+function World:click(button)
+	button.Activated:_fire()
+	self:_flushDeferred()
+end
+
+-- Найти элемент интерфейса игрока по имени.
+function World:gui(player, name: string)
+	return player.PlayerGui:FindFirstChild(name, true)
 end
 
 -- Модуль игры по пути: world:module("ServerScriptService.Server.Services.DataService").
