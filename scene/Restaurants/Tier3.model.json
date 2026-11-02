@@ -122,7 +122,14 @@
             ],
             "Material": "Concrete",
             "TopSurface": "Smooth",
-            "BottomSurface": "Smooth"
+            "BottomSurface": "Smooth",
+            "Attributes": {
+              "Attributes": {
+                "ArmoredHealth": {
+                  "Float64": 600.0
+                }
+              }
+            }
           }
         },
         {
@@ -168,7 +175,14 @@
             ],
             "Material": "Concrete",
             "TopSurface": "Smooth",
-            "BottomSurface": "Smooth"
+            "BottomSurface": "Smooth",
+            "Attributes": {
+              "Attributes": {
+                "ArmoredHealth": {
+                  "Float64": 600.0
+                }
+              }
+            }
           }
         },
         {
@@ -214,7 +228,14 @@
             ],
             "Material": "Concrete",
             "TopSurface": "Smooth",
-            "BottomSurface": "Smooth"
+            "BottomSurface": "Smooth",
+            "Attributes": {
+              "Attributes": {
+                "ArmoredHealth": {
+                  "Float64": 600.0
+                }
+              }
+            }
           }
         },
         {

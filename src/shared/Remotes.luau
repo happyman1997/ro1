@@ -37,6 +37,10 @@ local Remotes: { [string]: RemoteInfo } = {
 	HackState = { direction = "ToClient", kind = "Reliable" },
 	-- Выстрел (охраны или игрока) для эффекта трассера: (origin: Vector3, impact: Vector3).
 	ShotFired = { direction = "ToClient", kind = "Unreliable" },
+	-- Взрыв заряда для эффекта: (center: Vector3, radius: number).
+	ExplosionFx = { direction = "ToClient", kind = "Unreliable" },
+	-- Метка разведчика: (защитники: { Model }, длительность: number).
+	MarkDefenders = { direction = "ToClient", kind = "Reliable" },
 
 	-- Игрок меняет свою настройку: (имя настройки, значение).
 	ChangeSetting = { direction = "ToServer", kind = "Reliable" },
@@ -54,6 +58,8 @@ local Remotes: { [string]: RemoteInfo } = {
 	DismissDefender = { direction = "ToServer", kind = "Reliable" },
 	-- Купить оружие: (weaponId).
 	BuyWeapon = { direction = "ToServer", kind = "Reliable" },
+	-- Применить способность класса: (точка прицела: Vector3?).
+	UseAbility = { direction = "ToServer", kind = "Reliable" },
 }
 
 for _, info in Remotes do

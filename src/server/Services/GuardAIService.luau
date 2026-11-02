@@ -64,6 +64,7 @@ local ALARM_MEMORY = 12 -- сколько секунд охрана помнит
 local OWNER_ALERT_COOLDOWN = 15 -- не чаще одного уведомления владельцу
 local MELEE_REACH = 6 -- дистанция удара вышибалы
 local MISS_SPREAD = 3 -- разброс трассера при промахе, студы
+local SUPPRESSED_ACCURACY = 0.4 -- множитель точности под подавлением штурмовика
 local EFFECT_RADIUS = 250 -- кому отправлять эффект выстрела
 
 type Plot = PlotService.Plot
@@ -343,8 +344,7 @@ local function meleeAttack(defender: Defender, target: Candidate, now: number)
 	if (targetPosition - root.Position).Magnitude <= MELEE_REACH then
 		if now >= defender.nextAttackAt then
 			defender.nextAttackAt = now + defender.info.FireInterval
-			CombatService:recordDamage(target.player, nil)
-			target.humanoid:TakeDamage(defender.info.Damage)
+			CombatService:damagePlayer(target.player, defender.info.Damage, nil)
 		end
 	elseif (targetPosition - defender.post).Magnitude <= defender.info.LeashRadius then
 		stepTowards(defender, targetPosition)
@@ -364,9 +364,14 @@ local function rangedAttack(defender: Defender, target: Candidate, now: number)
 	end
 	defender.nextAttackAt = now + defender.info.FireInterval
 
-	if random:NextNumber() <= defender.info.Accuracy then
-		CombatService:recordDamage(target.player, nil)
-		target.humanoid:TakeDamage(defender.info.Damage)
+	-- Подавление штурмовика: охранник, по которому недавно попали, стреляет хуже.
+	local accuracy = defender.info.Accuracy
+	local suppressedUntil = defender.model:GetAttribute("SuppressedUntil")
+	if typeof(suppressedUntil) == "number" and suppressedUntil > workspace:GetServerTimeNow() then
+		accuracy *= SUPPRESSED_ACCURACY
+	end
+	if random:NextNumber() <= accuracy then
+		CombatService:damagePlayer(target.player, defender.info.Damage, nil)
 	else
 		impact += random:NextUnitVector() * MISS_SPREAD
 	end

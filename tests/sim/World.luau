@@ -82,7 +82,8 @@ local SUPER = {
 
 -- Классы, которым симулятор разрешает любые свойства (интерфейс, камера, мышь):
 -- их внешний вид тесты не проверяют, важны только логика и тексты.
-local LENIENT = { GuiBase2d = true, UIComponent = true, Camera = true, PlayerGui = true, Mouse = true }
+local LENIENT =
+	{ GuiBase2d = true, UIComponent = true, Camera = true, PlayerGui = true, Mouse = true, Highlight = true }
 
 local function superOf(className: string): string?
 	if className == "Instance" then
@@ -105,6 +106,7 @@ local PROPS = {
 		CastShadow = true,
 		Color = Color3.new(0.64, 0.64, 0.64),
 		Material = Enum.Material.Plastic,
+		Shape = Enum.PartType.Block,
 	},
 	SpawnLocation = { Neutral = true, Duration = 10, Enabled = true, AllowTeamChangeOnTouch = false },
 	Model = { PrimaryPart = NIL, WorldPivot = CFrame.new() },
@@ -944,6 +946,10 @@ METHODS.PVInstance = {
 		for _, descendant in world:_descendants(self) do
 			if world:_isA(descendant, "BasePart") then
 				descendant.CFrame = delta * descendant.CFrame
+			elseif world.state[descendant].ClassName == "Model" then
+				-- Как в Roblox: опоры вложенных моделей переезжают вместе с ними.
+				local pivot = world.state[descendant].props.WorldPivot or CFrame.new()
+				world.state[descendant].props.WorldPivot = delta * pivot
 			end
 		end
 		world.state[self].props.WorldPivot = delta * self.WorldPivot
@@ -1029,6 +1035,28 @@ METHODS.Workspace = {
 	end,
 	Raycast = function(world, _self, origin, direction, params)
 		return world:_raycast(origin, direction, params)
+	end,
+	-- Детали, чей объём пересекает шар (ближайшая точка параллелепипеда к центру).
+	GetPartBoundsInRadius = function(world, _self, center, radius)
+		local list = {}
+		for _, part in world:_parts() do
+			local props = world.state[part].props
+			if props.CanQuery == false then
+				continue -- как в Roblox: детали с CanQuery = false не находятся
+			end
+			local cframe = props.CFrame or CFrame.new()
+			local half = (props.Size or PROPS.BasePart.Size) / 2
+			local p = cframe:PointToObjectSpace(center)
+			local closest = Vector3.new(
+				math.clamp(p.X, -half.X, half.X),
+				math.clamp(p.Y, -half.Y, half.Y),
+				math.clamp(p.Z, -half.Z, half.Z)
+			)
+			if (p - closest).Magnitude <= radius then
+				table.insert(list, part)
+			end
+		end
+		return list
 	end,
 }
 

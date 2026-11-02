@@ -40,14 +40,15 @@
 	  Против него нужна статистика попаданий (в планах).
 ]]
 
-local CollectionService = game:GetService("CollectionService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerStorage = game:GetService("ServerStorage")
 
 local CharacterUtil = require(ReplicatedStorage.Shared.CharacterUtil)
+local Destruction = require(script.Parent.Parent.Modules.Destruction)
 local Guard = require(ReplicatedStorage.Shared.Guard)
 local Weapons = require(ReplicatedStorage.Shared.Config.Weapons)
+local AbilityService = require(script.Parent.AbilityService)
 local ClassService = require(script.Parent.ClassService)
 local CombatService = require(script.Parent.CombatService)
 local DataService = require(script.Parent.DataService)
@@ -63,6 +64,7 @@ local SHOT_EFFECT_RADIUS = 300
 local FIRE_INTERVAL_TOLERANCE = 0.85
 local DEFENDER_TAGS = { "Guard", "Turret" }
 local STAFF_TAGS = { "Staff" }
+local SUPPRESS_EFFECT = 3 -- секунд, на которые подавление снижает точность охранника
 
 type WeaponInfo = Weapons.WeaponInfo
 
@@ -98,30 +100,7 @@ local function stateOf(player: Player): ShooterState
 	return state
 end
 
-local function findTaggedAncestor(instance: Instance, tags: { string }): Instance?
-	local node: Instance? = instance
-	while node and node ~= workspace do
-		for _, tag in tags do
-			if CollectionService:HasTag(node, tag) then
-				return node
-			end
-		end
-		node = node.Parent
-	end
-	return nil
-end
-
--- Деталь или ближайший предок с атрибутом MaxHealth (разрушаемый объект).
-local function findDestructible(instance: Instance): Instance?
-	local node: Instance? = instance
-	while node and node ~= workspace do
-		if typeof(node:GetAttribute("MaxHealth")) == "number" then
-			return node
-		end
-		node = node.Parent
-	end
-	return nil
-end
+local findTaggedAncestor = Destruction.findTaggedAncestor
 
 -- Отклонить направление на случайный угол не больше degrees.
 local function applySpread(direction: Vector3, degrees: number): Vector3
@@ -140,45 +119,9 @@ local function reportAggression(plot: PlotService.Plot?, shooter: Player)
 	end
 end
 
-local function setPassable(target: Instance)
-	local parts = { target }
-	for _, descendant in target:GetDescendants() do
-		table.insert(parts, descendant)
-	end
-	for _, item in parts do
-		if item:IsA("BasePart") then
-			local part = item :: BasePart
-			part.Transparency = 1
-			part.CanCollide = false
-			part.CanQuery = false
-		end
-	end
-end
-
-local function breakObject(target: Instance)
-	target:SetAttribute("Broken", true)
-	if CollectionService:HasTag(target, "Furniture") then
-		-- Мебель остаётся на месте, но потемневшая: ресторан стоит, пока не починят.
-		if target:IsA("BasePart") then
-			local part = target :: BasePart
-			part.Color = Color3.fromRGB(45, 45, 45)
-		end
-	else
-		setPassable(target) -- стена или стекло разрушены: проход открыт
-	end
-end
-
 --------------------------------------------------------------------------------
 -- Урон
 --------------------------------------------------------------------------------
-
-local function damageHumanoid(humanoid: Humanoid?, amount: number): boolean
-	if humanoid and humanoid.Health > 0 then
-		humanoid:TakeDamage(amount)
-		return true
-	end
-	return false
-end
 
 local function applyHit(shooter: Player, info: WeaponInfo, part: BasePart)
 	-- Игрок
@@ -189,10 +132,7 @@ local function applyHit(shooter: Player, info: WeaponInfo, part: BasePart)
 			return
 		end
 		local humanoid = model:FindFirstChildOfClass("Humanoid")
-		if humanoid and humanoid.Health > 0 then
-			CombatService:recordDamage(victim, shooter) -- до урона: смертельный урон сразу вызывает Died
-		end
-		if damageHumanoid(humanoid, info.Damage) and humanoid then
+		if CombatService:damagePlayer(victim, info.Damage, shooter) > 0 and humanoid then
 			-- Напал на хозяина у него на территории — охрана хозяина отвечает.
 			local plot = PlotService:getPlot(victim)
 			local root = humanoid.RootPart
@@ -212,15 +152,9 @@ local function applyHit(shooter: Player, info: WeaponInfo, part: BasePart)
 	-- Охрана и турели
 	local defender = findTaggedAncestor(part, DEFENDER_TAGS)
 	if defender then
-		local amount = info.Damage * class.DefenderDamage
-		local humanoid = defender:FindFirstChildOfClass("Humanoid")
-		if humanoid then
-			damageHumanoid(humanoid, amount)
-		else
-			local health = defender:GetAttribute("Health")
-			if typeof(health) == "number" and health > 0 then
-				defender:SetAttribute("Health", math.max(0, health - amount))
-			end
+		Destruction.damageDefender(defender, info.Damage * class.DefenderDamage)
+		if AbilityService:isSuppressing(shooter) then
+			defender:SetAttribute("SuppressedUntil", workspace:GetServerTimeNow() + SUPPRESS_EFFECT)
 		end
 		reportAggression(plot, shooter)
 		return
@@ -229,25 +163,15 @@ local function applyHit(shooter: Player, info: WeaponInfo, part: BasePart)
 	-- Персонал
 	local staff = findTaggedAncestor(part, STAFF_TAGS)
 	if staff then
-		damageHumanoid(staff:FindFirstChildOfClass("Humanoid"), info.Damage)
+		Destruction.damageDefender(staff, info.Damage)
 		reportAggression(plot, shooter)
 		return
 	end
 
 	-- Мебель, стены, стекло
-	local target = findDestructible(part)
-	if target then
-		local maxHealth = target:GetAttribute("MaxHealth") :: number
-		local health = target:GetAttribute("Health")
-		local current = if typeof(health) == "number" then health else maxHealth
-		if current > 0 then
-			local left = math.max(0, current - info.StructureDamage * class.StructureDamage)
-			target:SetAttribute("Health", left)
-			if left <= 0 then
-				breakObject(target)
-			end
-			reportAggression(plot, shooter)
-		end
+	local target = Destruction.find(part, false)
+	if target and Destruction.damage(target, info.StructureDamage * class.StructureDamage, false) then
+		reportAggression(plot, shooter)
 	end
 end
 

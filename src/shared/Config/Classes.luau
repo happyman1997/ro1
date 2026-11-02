@@ -17,6 +17,7 @@ export type ClassInfo = {
 	Threat: number, -- приоритет цели у охраны: чем больше, тем раньше стреляют именно в него
 	StructureDamage: number, -- множитель урона по стенам, дверям, мебели
 	DefenderDamage: number, -- множитель урона по охране и турелям
+	Ability: string, -- ключ из Config/Abilities
 }
 
 local Classes: { [string]: ClassInfo } = {
@@ -30,6 +31,7 @@ local Classes: { [string]: ClassInfo } = {
 		Threat = 1,
 		StructureDamage = 1,
 		DefenderDamage = 1.5,
+		Ability = "Suppress",
 	},
 	Demolition = {
 		Name = "Подрывник",
@@ -41,6 +43,7 @@ local Classes: { [string]: ClassInfo } = {
 		Threat = 1,
 		StructureDamage = 3,
 		DefenderDamage = 0.8,
+		Ability = "Breach",
 	},
 	Tank = {
 		Name = "Танк",
@@ -52,6 +55,7 @@ local Classes: { [string]: ClassInfo } = {
 		Threat = 3,
 		StructureDamage = 1,
 		DefenderDamage = 1,
+		Ability = "Shield",
 	},
 	Stealth = {
 		Name = "Разведчик",
@@ -63,6 +67,7 @@ local Classes: { [string]: ClassInfo } = {
 		Threat = 0.8,
 		StructureDamage = 0.5,
 		DefenderDamage = 0.8,
+		Ability = "Mark",
 	},
 }
 
