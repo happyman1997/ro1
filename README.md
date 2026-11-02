@@ -76,6 +76,7 @@ src/server  → ServerScriptService.Server        (клиенту не видн�
     RestaurantService   — доход, остановка при разрушении, ремонт
     GuardAIService      — ИИ охраны и турелей
     WeaponService       — оружие: выдача, стрельба, урон, разрушение, блик
+    CombatService       — выпадение денег при гибели, штраф за выход из боя
     LeaderstatsService  — таблица игроков (только витрина)
     SettingsService     — образец запроса клиент → сервер
     DevCommandsService  — чат-команды для тестов (только в Studio)

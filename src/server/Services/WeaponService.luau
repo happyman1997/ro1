@@ -49,6 +49,7 @@ local CharacterUtil = require(ReplicatedStorage.Shared.CharacterUtil)
 local Guard = require(ReplicatedStorage.Shared.Guard)
 local Weapons = require(ReplicatedStorage.Shared.Config.Weapons)
 local ClassService = require(script.Parent.ClassService)
+local CombatService = require(script.Parent.CombatService)
 local DataService = require(script.Parent.DataService)
 local GuardAIService = require(script.Parent.GuardAIService)
 local NetService = require(script.Parent.NetService)
@@ -188,6 +189,9 @@ local function applyHit(shooter: Player, info: WeaponInfo, part: BasePart)
 			return
 		end
 		local humanoid = model:FindFirstChildOfClass("Humanoid")
+		if humanoid and humanoid.Health > 0 then
+			CombatService:recordDamage(victim, shooter) -- до урона: смертельный урон сразу вызывает Died
+		end
 		if damageHumanoid(humanoid, info.Damage) and humanoid then
 			-- Напал на хозяина у него на территории — охрана хозяина отвечает.
 			local plot = PlotService:getPlot(victim)
