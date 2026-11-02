@@ -122,7 +122,14 @@
             ],
             "Material": "Brick",
             "TopSurface": "Smooth",
-            "BottomSurface": "Smooth"
+            "BottomSurface": "Smooth",
+            "Attributes": {
+              "Attributes": {
+                "MaxHealth": {
+                  "Float64": 600.0
+                }
+              }
+            }
           }
         },
         {
@@ -168,7 +175,14 @@
             ],
             "Material": "Brick",
             "TopSurface": "Smooth",
-            "BottomSurface": "Smooth"
+            "BottomSurface": "Smooth",
+            "Attributes": {
+              "Attributes": {
+                "MaxHealth": {
+                  "Float64": 600.0
+                }
+              }
+            }
           }
         },
         {
@@ -214,7 +228,14 @@
             ],
             "Material": "Brick",
             "TopSurface": "Smooth",
-            "BottomSurface": "Smooth"
+            "BottomSurface": "Smooth",
+            "Attributes": {
+              "Attributes": {
+                "MaxHealth": {
+                  "Float64": 600.0
+                }
+              }
+            }
           }
         },
         {
@@ -361,6 +382,9 @@
                 },
                 "ShootThrough": {
                   "Bool": true
+                },
+                "MaxHealth": {
+                  "Float64": 40.0
                 }
               }
             }
@@ -418,6 +442,9 @@
                 },
                 "ShootThrough": {
                   "Bool": true
+                },
+                "MaxHealth": {
+                  "Float64": 40.0
                 }
               }
             }
@@ -475,7 +502,14 @@
             "BottomSurface": "Smooth",
             "Tags": [
               "Furniture"
-            ]
+            ],
+            "Attributes": {
+              "Attributes": {
+                "MaxHealth": {
+                  "Float64": 150.0
+                }
+              }
+            }
           }
         },
         {
@@ -524,7 +558,14 @@
             "BottomSurface": "Smooth",
             "Tags": [
               "Furniture"
-            ]
+            ],
+            "Attributes": {
+              "Attributes": {
+                "MaxHealth": {
+                  "Float64": 200.0
+                }
+              }
+            }
           }
         },
         {
@@ -573,7 +614,14 @@
             "BottomSurface": "Smooth",
             "Tags": [
               "Furniture"
-            ]
+            ],
+            "Attributes": {
+              "Attributes": {
+                "MaxHealth": {
+                  "Float64": 80.0
+                }
+              }
+            }
           }
         },
         {
@@ -622,7 +670,14 @@
             "BottomSurface": "Smooth",
             "Tags": [
               "Furniture"
-            ]
+            ],
+            "Attributes": {
+              "Attributes": {
+                "MaxHealth": {
+                  "Float64": 80.0
+                }
+              }
+            }
           }
         }
       ]

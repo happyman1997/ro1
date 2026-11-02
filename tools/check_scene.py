@@ -5,7 +5,9 @@
   • в каждой модели уровня ровно одна касса (тег CashRegister) и есть мебель (тег Furniture);
   • у каждого защитника (тег Guard/Turret) атрибут DefenderType из Config/Defense
     и деталь, откуда он смотрит (Head или HumanoidRootPart);
-  • в Workspace есть участки (тег Plot) с деталями Origin и Territory.
+  • в Workspace есть участки (тег Plot) с деталями Origin и Territory;
+  • для каждого оружия из Config/Weapons есть Tool ServerStorage.Weapons.<id>
+    с деталью Handle и атрибутом WeaponId = <id>.
 
 Запуск: python3 tools/check_scene.py путь/к/месту.rbxlx
 """
@@ -85,6 +87,7 @@ def child(item, name):
 def main(place: str) -> int:
     tier_models = config_keys(ROOT / "src/shared/Config/Tiers.luau", r'^\s*Model = "([^"]+)"')
     defender_types = config_keys(ROOT / "src/shared/Config/Defense.luau", r"^\t(\w+) = \{")
+    weapon_ids = config_keys(ROOT / "src/shared/Config/Weapons.luau", r"^\t(\w+) = \{")
     root = ET.parse(place).getroot()
     services = {item.get("class"): item for item in root.findall("Item")}
     errors: list[str] = []
@@ -107,6 +110,20 @@ def main(place: str) -> int:
                 errors.append(f"{where}: касс с тегом CashRegister — {len(registers)}, нужна ровно одна")
             if not any("Furniture" in tags_of(i) for _, i in items):
                 errors.append(f"{where}: нет мебели с тегом Furniture")
+
+    # Оружие.
+    weapons = child(storage, "Weapons") if storage is not None else None
+    for weapon_id in sorted(weapon_ids):
+        tool = child(weapons, weapon_id) if weapons is not None else None
+        where = f"ServerStorage.Weapons.{weapon_id}"
+        if tool is None or tool.get("class") != "Tool":
+            errors.append(f"{where}: нет шаблона оружия (Tool)")
+            continue
+        handle = child(tool, "Handle")
+        if handle is None or handle.get("class") not in BASE_PARTS:
+            errors.append(f"{where}: нет детали Handle")
+        if attributes_of(tool).get("WeaponId") != weapon_id:
+            errors.append(f"{where}: атрибут WeaponId должен быть {weapon_id!r}")
 
     # Защитники везде, где они могут оказаться.
     for service in services.values():
@@ -138,7 +155,10 @@ def main(place: str) -> int:
         for error in errors:
             print(f"  • {error}")
         return 1
-    print(f"Сцена в порядке: уровней {len(tier_models)}, участков {len(plots)}, типов охраны {len(defender_types)}")
+    print(
+        f"Сцена в порядке: уровней {len(tier_models)}, участков {len(plots)}, "
+        f"типов охраны {len(defender_types)}, оружия {len(weapon_ids)}"
+    )
     return 0
 
 

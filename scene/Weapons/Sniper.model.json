@@ -1,0 +1,34 @@
+{
+  "ClassName": "Tool",
+  "Properties": {
+    "ToolTip": "Снайперская винтовка",
+    "CanBeDropped": false,
+    "Attributes": {
+      "Attributes": {
+        "WeaponId": {
+          "String": "Sniper"
+        }
+      }
+    }
+  },
+  "Children": [
+    {
+      "Name": "Handle",
+      "ClassName": "Part",
+      "Properties": {
+        "Size": [
+          0.4,
+          0.9,
+          5.0
+        ],
+        "Color": [
+          0.15,
+          0.17,
+          0.12
+        ],
+        "Material": "Metal",
+        "CanCollide": false
+      }
+    }
+  ]
+}

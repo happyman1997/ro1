@@ -289,12 +289,7 @@ end
 --------------------------------------------------------------------------------
 
 local function broadcastShot(origin: Vector3, impact: Vector3)
-	for _, player in Players:GetPlayers() do
-		local _, _, root = CharacterUtil.getAlive(player)
-		if root and (root.Position - origin).Magnitude <= EFFECT_RADIUS then
-			NetService:fireClient(player, "DefenderFired", origin, impact)
-		end
-	end
+	NetService:fireNearby(origin, EFFECT_RADIUS, nil, "ShotFired", origin, impact)
 end
 
 local function faceTarget(defender: Defender, position: Vector3)

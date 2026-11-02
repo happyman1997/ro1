@@ -1,7 +1,7 @@
 --!strict
 --[[
 	EffectsController — визуальные эффекты, которые рисует только клиент.
-	Сейчас: трассеры выстрелов охраны (событие DefenderFired).
+	Сейчас: трассеры выстрелов (событие ShotFired от сервера и свои выстрелы игрока).
 	Урон считает сервер. Эффект лишь показывает, что выстрел был.
 ]]
 
@@ -11,11 +11,12 @@ local Net = require(script.Parent.Parent:WaitForChild("Modules"):WaitForChild("N
 
 local TRACER_LIFETIME = 0.06
 local TRACER_COLOR = Color3.fromRGB(255, 210, 120)
-local MAX_TRACER_LENGTH = 500
+local MAX_TRACER_LENGTH = 700
 
 local EffectsController = {}
 
-local function drawTracer(origin: Vector3, impact: Vector3)
+-- Нарисовать трассер от origin до impact (видно только этому игроку).
+function EffectsController:drawTracer(origin: Vector3, impact: Vector3)
 	local length = (impact - origin).Magnitude
 	if length < 0.1 or length > MAX_TRACER_LENGTH then
 		return
@@ -35,9 +36,9 @@ local function drawTracer(origin: Vector3, impact: Vector3)
 end
 
 function EffectsController:Start()
-	Net.on("DefenderFired", function(origin: unknown, impact: unknown)
+	Net.on("ShotFired", function(origin: unknown, impact: unknown)
 		if typeof(origin) == "Vector3" and typeof(impact) == "Vector3" then
-			drawTracer(origin, impact)
+			EffectsController:drawTracer(origin, impact)
 		end
 	end)
 end

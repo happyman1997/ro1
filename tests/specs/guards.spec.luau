@@ -44,7 +44,7 @@ return function(test)
 		world:advance(3)
 		expect.less(health(world, intruder), maxHealth(world, intruder), "охрана попала")
 		expect.truthy(world:hasNotification(owner, "Тревога"), "владельцу пришла тревога")
-		expect.greater(#world:received(intruder, "DefenderFired"), 0, "клиенту ушли трассеры")
+		expect.greater(#world:received(intruder, "ShotFired"), 0, "клиенту ушли трассеры")
 	end)
 
 	test(

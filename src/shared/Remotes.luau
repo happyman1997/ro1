@@ -35,8 +35,8 @@ local Remotes: { [string]: RemoteInfo } = {
 	Notify = { direction = "ToClient", kind = "Reliable" },
 	-- Состояние взлома для вора: ("Started", endsAtServerTime) | ("Ended", success).
 	HackState = { direction = "ToClient", kind = "Reliable" },
-	-- Выстрел охраны для эффекта трассера: (origin: Vector3, impact: Vector3).
-	DefenderFired = { direction = "ToClient", kind = "Unreliable" },
+	-- Выстрел (охраны или игрока) для эффекта трассера: (origin: Vector3, impact: Vector3).
+	ShotFired = { direction = "ToClient", kind = "Unreliable" },
 
 	-- Игрок меняет свою настройку: (имя настройки, значение).
 	ChangeSetting = { direction = "ToServer", kind = "Reliable" },
@@ -46,6 +46,8 @@ local Remotes: { [string]: RemoteInfo } = {
 	UpgradeRestaurant = { direction = "ToServer", kind = "Reliable" },
 	-- Оплатить ремонт после штурма: ().
 	RepairRestaurant = { direction = "ToServer", kind = "Reliable" },
+	-- Выстрел из оружия в руках: (направление прицела: Vector3). Всё остальное считает сервер.
+	Fire = { direction = "ToServer", kind = "Reliable" },
 }
 
 for _, info in Remotes do

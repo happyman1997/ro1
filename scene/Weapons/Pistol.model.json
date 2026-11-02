@@ -1,0 +1,34 @@
+{
+  "ClassName": "Tool",
+  "Properties": {
+    "ToolTip": "Пистолет",
+    "CanBeDropped": false,
+    "Attributes": {
+      "Attributes": {
+        "WeaponId": {
+          "String": "Pistol"
+        }
+      }
+    }
+  },
+  "Children": [
+    {
+      "Name": "Handle",
+      "ClassName": "Part",
+      "Properties": {
+        "Size": [
+          0.4,
+          1.2,
+          1.6
+        ],
+        "Color": [
+          0.2,
+          0.2,
+          0.22
+        ],
+        "Material": "Metal",
+        "CanCollide": false
+      }
+    }
+  ]
+}

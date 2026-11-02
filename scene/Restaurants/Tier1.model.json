@@ -127,6 +127,9 @@
               "Attributes": {
                 "ShootThrough": {
                   "Bool": true
+                },
+                "MaxHealth": {
+                  "Float64": 120.0
                 }
               }
             }
@@ -180,6 +183,9 @@
               "Attributes": {
                 "ShootThrough": {
                   "Bool": true
+                },
+                "MaxHealth": {
+                  "Float64": 120.0
                 }
               }
             }
@@ -233,6 +239,9 @@
               "Attributes": {
                 "ShootThrough": {
                   "Bool": true
+                },
+                "MaxHealth": {
+                  "Float64": 120.0
                 }
               }
             }
@@ -382,7 +391,14 @@
             "BottomSurface": "Smooth",
             "Tags": [
               "Furniture"
-            ]
+            ],
+            "Attributes": {
+              "Attributes": {
+                "MaxHealth": {
+                  "Float64": 150.0
+                }
+              }
+            }
           }
         },
         {
@@ -431,7 +447,14 @@
             "BottomSurface": "Smooth",
             "Tags": [
               "Furniture"
-            ]
+            ],
+            "Attributes": {
+              "Attributes": {
+                "MaxHealth": {
+                  "Float64": 200.0
+                }
+              }
+            }
           }
         }
       ]
