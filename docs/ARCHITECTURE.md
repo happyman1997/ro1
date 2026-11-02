@@ -31,7 +31,9 @@
 
 Клиент: `StateController` (копия данных), `NotificationController`,
 `RegisterController` (подсказки кассы), `EffectsController` (трассеры),
-`WeaponController` (выстрелы, приближение прицела), `SettingsController`.
+`WeaponController` (выстрелы, приближение прицела), `HudController` (интерфейс:
+деньги, уровень, улучшение, ремонт, панели охраны, магазина и классов),
+`SettingsController`.
 
 **В планах** (их места в архитектуре уже заложены):
 
