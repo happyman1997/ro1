@@ -97,6 +97,7 @@ src/client  → StarterPlayerScripts.Client
 scene/      → тестовая карта: участки (Workspace.Plots) и модели уровней
               (ServerStorage.Restaurants) в формате .model.json
 tools/      → check_scene.py — проверка сцены в CI
+tests/      → симулятор сервера (sim/) и сценарии (specs/), запуск — run.luau
 ```
 
 Тестовая карта хранится в git (`scene/`), поэтому её видно в истории и её проверяет
@@ -172,7 +173,32 @@ rojo sourcemap -o sourcemap.json
 luau-lsp в VS Code, чтобы понимать пути вида `script.Parent.Services`.
 Рекомендуемые расширения перечислены в `.vscode/extensions.json`.
 
-Те же проверки, а также `luau-lsp analyze` (типы в строгом режиме) и
-`rojo build`, автоматически запускаются в GitHub Actions на каждый пуш
-и пулл-реквест: вкладка **Actions → «Проверка кода»**. Версии инструментов
-берутся из `rokit.toml`.
+### Автотесты
+
+`tests/` — симулятор сервера Roblox на [Lune](https://lune-org.github.io/docs).
+Он запускает настоящий серверный код из собранного места: игроки, персонажи,
+лучи видимости, события, виртуальное время. Сценарии в `tests/specs`: доход
+и касса, улучшение и ремонт, охрана и турели, бронестекло, взлом и поимка вора,
+проверки Remote и анти-флуд.
+
+```bash
+rojo build default.project.json -o build/ro1.rbxlx
+```
+
+```bash
+lune run tests/run.luau build/ro1.rbxlx
+```
+
+Чтобы запустить часть тестов, добавьте фильтр по названию:
+`lune run tests/run.luau build/ro1.rbxlx охрана`. Флаг `--verbose` показывает
+предупреждения сервера.
+
+Физики, клиента и рендера в симуляторе нет. Это проверка логики сервера, а не
+замена плейтеста.
+
+### CI
+
+Все проверки — `rojo build`, проверка сцены, автотесты, `luau-lsp analyze`
+(строгие типы), StyLua и selene — автоматически запускаются в GitHub Actions
+на каждый пуш и пулл-реквест: вкладка **Actions → «Проверка кода»**. Версии
+инструментов берутся из `rokit.toml`.
