@@ -26,7 +26,7 @@ export type Invite = { userId: number, name: string, expiresAt: number }
 local PartyController = {}
 
 -- Состав группы или приглашения изменились.
-PartyController.Changed = Signal.new() :: Signal.Signal<>
+PartyController.Changed = Signal.new() :: Signal.Signal<()>
 
 local members: { number } = {}
 local invites: { [number]: Invite } = {}
