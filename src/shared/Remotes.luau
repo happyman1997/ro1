@@ -52,6 +52,8 @@ local Remotes: { [string]: RemoteInfo } = {
 	HireDefender = { direction = "ToServer", kind = "Reliable" },
 	-- Уволить охрану из слота: (slotId).
 	DismissDefender = { direction = "ToServer", kind = "Reliable" },
+	-- Купить оружие: (weaponId).
+	BuyWeapon = { direction = "ToServer", kind = "Reliable" },
 }
 
 for _, info in Remotes do

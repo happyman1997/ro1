@@ -5,6 +5,9 @@
 	• Выручка копится в кассе (deposit) до лимита уровня. Это состояние сессии:
 	  оно живёт в памяти сервера и при выходе владельца не сохраняется.
 	• Владелец подходит и забирает выручку: подсказка «Забрать выручку» (E).
+	• Кассу можно разбить (атрибут MaxHealth, урон от WeaponService): SPILL_FRACTION
+	  выручки высыпается пачкой, остальное сгорает, ресторан стоит до ремонта.
+	  Это «громкий» грабёж: быстро, но меньше и под огнём охраны.
 	• Разведчик взламывает чужую кассу: подсказка «Взломать» (F) запускает
 	  СЕРВЕРНЫЙ таймер (Tiers[tier].HackDuration). Пока идёт взлом, вор
 	  не замаскирован: охрана, которая его видит, открывает огонь.
@@ -40,6 +43,7 @@ local LineOfSight = require(script.Parent.Parent.Modules.LineOfSight)
 local RateLimiter = require(script.Parent.Parent.Modules.RateLimiter)
 local ClassService = require(script.Parent.ClassService)
 local DataService = require(script.Parent.DataService)
+local CombatService = require(script.Parent.CombatService)
 local NetService = require(script.Parent.NetService)
 local PlotService = require(script.Parent.PlotService)
 
@@ -51,6 +55,7 @@ local INTERACT_DISTANCE = 12 -- серверный предел (с запасо
 local HACK_LEASH_DISTANCE = 12 -- во время взлома нельзя отходить дальше
 local CATCH_RADIUS = 18 -- владелец ближе и видит вора — вор пойман
 local STEAL_FRACTION = 0.75 -- доля кассы, которую уносит вор
+local SPILL_FRACTION = 0.4 -- доля кассы, которая высыпается, если кассу разбили (остальное сгорает)
 local MIN_LOOT = 50 -- меньше — взлом не начинается
 local OWNER_ALERT_DELAY = 2 -- через сколько секунд взлома владельцу приходит тревога
 local REGISTER_COOLDOWN = 90 -- после успешного взлома касса защищена
@@ -392,6 +397,34 @@ local function createPrompt(parent: BasePart, role: string, actionText: string, 
 	return prompt
 end
 
+-- Кассу разбили (прочность упала до нуля, атрибут Broken ставит WeaponService):
+-- часть выручки высыпается пачкой перед кассой, остальное сгорает.
+local function onRegisterBroken(plot: Plot)
+	local register = registers[plot]
+	if register == nil then
+		return
+	end
+	cancelHack(plot, "кассу разбили", false)
+	for _, prompt in register.prompts do
+		prompt:Destroy() -- разбитую кассу не забрать и не взломать до ремонта
+	end
+	table.clear(register.prompts)
+	local amount = math.floor((cash[plot] or 0) * SPILL_FRACTION)
+	cash[plot] = 0
+	updateDisplay(plot)
+	if amount > 0 then
+		local front = register.part.CFrame.LookVector
+		CombatService:spawnDrop(register.part.Position - Vector3.new(0, 1, 0) + front * -2.5, amount)
+	end
+	local owner = plot.owner
+	if owner then
+		NetService:notify(
+			owner,
+			`Вашу кассу разбили! Высыпалось ${amount}, ресторан стоит до ремонта`
+		)
+	end
+end
+
 local function setupRegister(plot: Plot, restaurant: Model)
 	removeRegister(plot)
 	local part = findRegisterPart(restaurant)
@@ -412,6 +445,11 @@ local function setupRegister(plot: Plot, restaurant: Model)
 			hackPrompt.Triggered:Connect(function(player: Player)
 				onHackRequest(plot, player)
 			end),
+			part:GetAttributeChangedSignal("Broken"):Connect(function()
+				if part:GetAttribute("Broken") == true then
+					onRegisterBroken(plot)
+				end
+			end),
 		},
 	}
 	updateDisplay(plot)
@@ -427,6 +465,10 @@ end
 function CashRegisterService:deposit(plot: Plot, amount: number)
 	if plot.owner == nil or not (amount > 0 and amount < math.huge) then
 		return
+	end
+	local register = registers[plot]
+	if register and register.part:GetAttribute("Broken") == true then
+		return -- разбитая касса не принимает выручку
 	end
 	local capacity = Tiers[plot.tier].RegisterCapacity
 	cash[plot] = math.min(capacity, (cash[plot] or 0) + amount)

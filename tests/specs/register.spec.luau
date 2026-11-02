@@ -167,4 +167,60 @@ return function(test)
 		world:advance(3)
 		expect.less(world:humanoid(thief).Health, before, "охрана стреляет во взломщика")
 	end)
+	test(
+		"кассу можно разбить: 40% высыпается, остальное сгорает, ресторан встаёт",
+		function(world, expect)
+			local owner, thief, plotModel, plot, register, s = setup(world)
+			removeGuard(plotModel)
+			world:chat(thief, "/class Demolition") -- урон по конструкциям ×3: 15 за выстрел
+			s.Register:deposit(plot, 1200)
+			world:moveTo(owner, world.Vector3.new(0, 3, 70))
+			world:moveTo(thief, world:plotPoint(plotModel, 0, 3, 9))
+			world:equip(thief, "Pistol")
+			world:advance(0.5)
+			for _ = 1, 20 do
+				world:fireServer(thief, "Fire", world:aimAt(thief, register.Position))
+				world:advance(0.31)
+			end
+			expect.equal(register:GetAttribute("Broken"), true, "касса разбита (300 прочности)")
+			expect.equal(s.Register:getCash(plot), 0, "в кассе ничего не осталось")
+			local drops = world.workspace:FindFirstChild("CashDrops"):GetChildren()
+			expect.equal(#drops, 1, "высыпалась одна пачка")
+			expect.equal(drops[1]:GetAttribute("Amount"), 480, "40% от $1200")
+			expect.equal(world:findPrompt(register, "Collect"), nil, "разбитую кассу не забрать")
+			expect.equal(world:findPrompt(register, "Hack"), nil, "и не взломать")
+			expect.truthy(
+				world:hasNotification(owner, "Вашу кассу разбили"),
+				"владельцу сообщили"
+			)
+			world:advance(2.5)
+			expect.equal(plotModel:GetAttribute("Operational"), false, "ресторан стоит")
+			s.Register:deposit(plot, 100)
+			expect.equal(
+				s.Register:getCash(plot),
+				0,
+				"разбитая касса не принимает выручку"
+			)
+		end
+	)
+
+	test("после ремонта касса снова работает", function(world, expect)
+		local owner, thief, plotModel, plot, register, s = setup(world)
+		removeGuard(plotModel)
+		register:SetAttribute("Health", 1)
+		world:moveTo(thief, world:plotPoint(plotModel, 0, 3, 9))
+		world:equip(thief, "Pistol")
+		world:advance(0.5)
+		world:fireServer(thief, "Fire", world:aimAt(thief, register.Position))
+		expect.equal(register:GetAttribute("Broken"), true, "касса разбита")
+		world:moveTo(thief, world.Vector3.new(0, 3, 70))
+		world:advance(25) -- бой закончился
+		world:chat(owner, "/cash 500")
+		world:chat(owner, "/repair")
+		local newRegister = world:findTagged(plotModel:FindFirstChild("Restaurant"), "CashRegister")
+		expect.truthy(newRegister ~= register, "новая касса после ремонта")
+		expect.truthy(world:findPrompt(newRegister, "Collect"), "подсказка сбора вернулась")
+		s.Register:deposit(plot, 100)
+		expect.equal(s.Register:getCash(plot), 100, "касса принимает выручку")
+	end)
 end

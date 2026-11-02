@@ -17,6 +17,7 @@
 	/slots            слоты охраны в своём ресторане
 	/hire <слот> <тип> нанять охрану (Bouncer, Gunner, CeilingTurret)
 	/dismiss <слот>   уволить охрану
+	/buy <оружие>     купить оружие за Cash (как в магазине)
 	/fill             заполнить свою кассу до предела
 	/break            сломать мебель в своём ресторане
 ]]
@@ -37,6 +38,7 @@ local DataService = require(script.Parent.DataService)
 local NetService = require(script.Parent.NetService)
 local PlotService = require(script.Parent.PlotService)
 local RestaurantService = require(script.Parent.RestaurantService)
+local ShopService = require(script.Parent.ShopService)
 local WeaponService = require(script.Parent.WeaponService)
 local Weapons = require(ReplicatedStorage.Shared.Config.Weapons)
 
@@ -157,6 +159,18 @@ commands.dismiss = {
 			return
 		end
 		DefenseService:dismiss(player, args[1])
+	end,
+}
+
+commands.buy = {
+	usage = `/buy <{table.concat(sortedKeys(Weapons), "|")}> — купить оружие за Cash`,
+	run = function(player: Player, args: { string })
+		local weaponId = args[1]
+		if weaponId == nil or Weapons[weaponId] == nil then
+			NetService:notify(player, `Оружие: {table.concat(sortedKeys(Weapons), ", ")}`)
+			return
+		end
+		ShopService:buyWeapon(player, weaponId)
 	end,
 }
 

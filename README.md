@@ -78,6 +78,7 @@ src/server  → ServerScriptService.Server        (клиенту не видн�
     WeaponService       — оружие: выдача, стрельба, урон, разрушение, блик
     CombatService       — выпадение денег при гибели, штраф за выход из боя
     DefenseService      — наём охраны в слоты, увольнение, замена павших
+    ShopService         — покупка оружия за Cash
     LeaderstatsService  — таблица игроков (только витрина)
     SettingsService     — образец запроса клиент → сервер
     DevCommandsService  — чат-команды для тестов (только в Studio)
