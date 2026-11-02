@@ -28,6 +28,7 @@ local DataTemplate = require(ReplicatedStorage.Shared.DataTemplate)
 local Signal = require(ReplicatedStorage.Shared.Signal)
 local Tiers = require(ReplicatedStorage.Shared.Config.Tiers)
 local DataService = require(script.Parent.DataService)
+local MovementService = require(script.Parent.MovementService)
 local NetService = require(script.Parent.NetService)
 
 local PLOT_TAG = "Plot"
@@ -201,7 +202,7 @@ local function assign(player: Player, data: DataTemplate.PlayerData)
 		player.RespawnLocation = spawn
 		local character = player.Character
 		if character then
-			character:PivotTo(spawn.CFrame + Vector3.new(0, 4, 0))
+			MovementService:teleport(player, spawn.CFrame + Vector3.new(0, 4, 0))
 		end
 	end
 
