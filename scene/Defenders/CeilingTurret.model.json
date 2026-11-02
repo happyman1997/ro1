@@ -1,0 +1,123 @@
+{
+  "ClassName": "Model",
+  "Properties": {
+    "Tags": [
+      "Turret"
+    ],
+    "Attributes": {
+      "Attributes": {
+        "DefenderType": {
+          "String": "CeilingTurret"
+        }
+      }
+    },
+    "WorldPivot": {
+      "CFrame": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "orientation": [
+          [
+            1,
+            0,
+            0
+          ],
+          [
+            0,
+            1,
+            0
+          ],
+          [
+            0,
+            0,
+            1
+          ]
+        ]
+      }
+    }
+  },
+  "Children": [
+    {
+      "Name": "Head",
+      "ClassName": "Part",
+      "Properties": {
+        "Anchored": true,
+        "Size": [
+          1.6,
+          1,
+          1.6
+        ],
+        "CFrame": {
+          "CFrame": {
+            "position": [
+              0,
+              0,
+              0
+            ],
+            "orientation": [
+              [
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0
+              ],
+              [
+                0,
+                0,
+                1
+              ]
+            ]
+          }
+        },
+        "Color": [
+          0.1,
+          0.1,
+          0.1
+        ],
+        "Material": "Metal",
+        "TopSurface": "Smooth",
+        "BottomSurface": "Smooth"
+      },
+      "Children": [
+        {
+          "Name": "Muzzle",
+          "ClassName": "Attachment",
+          "Properties": {
+            "CFrame": {
+              "CFrame": {
+                "position": [
+                  0,
+                  0,
+                  -1
+                ],
+                "orientation": [
+                  [
+                    1,
+                    0,
+                    0
+                  ],
+                  [
+                    0,
+                    1,
+                    0
+                  ],
+                  [
+                    0,
+                    0,
+                    1
+                  ]
+                ]
+              }
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -77,6 +77,7 @@ src/server  → ServerScriptService.Server        (клиенту не видн�
     GuardAIService      — ИИ охраны и турелей
     WeaponService       — оружие: выдача, стрельба, урон, разрушение, блик
     CombatService       — выпадение денег при гибели, штраф за выход из боя
+    DefenseService      — наём охраны в слоты, увольнение, замена павших
     LeaderstatsService  — таблица игроков (только витрина)
     SettingsService     — образец запроса клиент → сервер
     DevCommandsService  — чат-команды для тестов (только в Studio)
@@ -99,7 +100,7 @@ src/client  → StarterPlayerScripts.Client
     Net            — fire() на сервер, on() от сервера
 
 scene/      → тестовая карта: участки (Workspace.Plots), модели уровней
-              (ServerStorage.Restaurants) и оружие (ServerStorage.Weapons), .model.json
+              (ServerStorage.Restaurants), оружие и шаблоны охраны (ServerStorage), .model.json
 tools/      → check_scene.py — проверка сцены в CI
 tests/      → симулятор сервера (sim/) и сценарии (specs/), запуск — run.luau
 ```

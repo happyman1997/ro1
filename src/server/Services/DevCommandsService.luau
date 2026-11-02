@@ -14,6 +14,9 @@
 	/repair           починить ресторан
 	/class <класс>    сменить класс (на своей территории)
 	/weapon <оружие>  получить оружие (Pistol, Rifle, Sniper)
+	/slots            слоты охраны в своём ресторане
+	/hire <слот> <тип> нанять охрану (Bouncer, Gunner, CeilingTurret)
+	/dismiss <слот>   уволить охрану
 	/fill             заполнить свою кассу до предела
 	/break            сломать мебель в своём ресторане
 ]]
@@ -28,6 +31,8 @@ local Classes = require(ReplicatedStorage.Shared.Config.Classes)
 local Tiers = require(ReplicatedStorage.Shared.Config.Tiers)
 local CashRegisterService = require(script.Parent.CashRegisterService)
 local ClassService = require(script.Parent.ClassService)
+local DefenseService = require(script.Parent.DefenseService)
+local Defense = require(ReplicatedStorage.Shared.Config.Defense)
 local DataService = require(script.Parent.DataService)
 local NetService = require(script.Parent.NetService)
 local PlotService = require(script.Parent.PlotService)
@@ -115,6 +120,43 @@ commands.weapon = {
 		if WeaponService:giveWeapon(player, weaponId) then
 			NetService:notify(player, `Получено: {Weapons[weaponId].Name}`)
 		end
+	end,
+}
+
+commands.slots = {
+	usage = "/slots — слоты охраны в своём ресторане",
+	run = function(player: Player)
+		local lines = {}
+		for _, slot in DefenseService:getSlots(player) do
+			table.insert(lines, `{slot.id} ({slot.kind}): {slot.occupant or "свободно"}`)
+		end
+		NetService:notify(player, if #lines > 0 then table.concat(lines, "\n") else "Слотов нет")
+	end,
+}
+
+commands.hire = {
+	usage = `/hire <слот> <{table.concat(sortedKeys(Defense), "|")}> — нанять охрану`,
+	run = function(player: Player, args: { string })
+		local slotId, defenderType = args[1], args[2]
+		if slotId == nil or defenderType == nil or Defense[defenderType] == nil then
+			NetService:notify(
+				player,
+				`Пример: /hire Door1 Bouncer. Типы: {table.concat(sortedKeys(Defense), ", ")}`
+			)
+			return
+		end
+		DefenseService:hire(player, slotId, defenderType)
+	end,
+}
+
+commands.dismiss = {
+	usage = "/dismiss <слот> — уволить охрану",
+	run = function(player: Player, args: { string })
+		if args[1] == nil then
+			NetService:notify(player, "Пример: /dismiss Door1")
+			return
+		end
+		DefenseService:dismiss(player, args[1])
 	end,
 }
 

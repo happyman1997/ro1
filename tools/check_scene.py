@@ -7,7 +7,9 @@
     и деталь, откуда он смотрит (Head или HumanoidRootPart);
   • в Workspace есть участки (тег Plot) с деталями Origin и Territory;
   • для каждого оружия из Config/Weapons есть Tool ServerStorage.Weapons.<id>
-    с деталью Handle и атрибутом WeaponId = <id>.
+    с деталью Handle и атрибутом WeaponId = <id>;
+  • для каждого типа охраны есть шаблон ServerStorage.Defenders.<тип> с нужным тегом;
+  • слоты охраны (тег DefenseSlot) имеют SlotId и SlotKind, SlotId уникальны в уровне.
 
 Запуск: python3 tools/check_scene.py путь/к/месту.rbxlx
 """
@@ -110,6 +112,16 @@ def main(place: str) -> int:
                 errors.append(f"{where}: касс с тегом CashRegister — {len(registers)}, нужна ровно одна")
             if not any("Furniture" in tags_of(i) for _, i in items):
                 errors.append(f"{where}: нет мебели с тегом Furniture")
+            slot_ids = []
+            for path, item in items:
+                if "DefenseSlot" in tags_of(item):
+                    attrs = attributes_of(item)
+                    if not isinstance(attrs.get("SlotId"), str) or attrs.get("SlotKind") not in ("Guard", "Turret"):
+                        errors.append(f"{path}: у слота нужны SlotId и SlotKind (Guard/Turret)")
+                    slot_ids.append(attrs.get("SlotId"))
+            duplicates = sorted({s for s in slot_ids if slot_ids.count(s) > 1 and s})
+            if duplicates:
+                errors.append(f"{where}: повторяются SlotId {duplicates}")
 
     # Оружие.
     weapons = child(storage, "Weapons") if storage is not None else None
@@ -124,6 +136,18 @@ def main(place: str) -> int:
             errors.append(f"{where}: нет детали Handle")
         if attributes_of(tool).get("WeaponId") != weapon_id:
             errors.append(f"{where}: атрибут WeaponId должен быть {weapon_id!r}")
+
+    # Шаблоны наёмной охраны.
+    defense_kinds = dict(re.findall(r'^\t(\w+) = \{[^}]*?Kind = "(\w+)"', (ROOT / "src/shared/Config/Defense.luau").read_text(encoding="utf-8"), re.M | re.S))
+    defenders = child(storage, "Defenders") if storage is not None else None
+    for defender_type in sorted(defender_types):
+        template = child(defenders, defender_type) if defenders is not None else None
+        where = f"ServerStorage.Defenders.{defender_type}"
+        expected_tag = "Turret" if defense_kinds.get(defender_type) == "Turret" else "Guard"
+        if template is None or template.get("class") != "Model":
+            errors.append(f"{where}: нет шаблона охраны (Model)")
+        elif expected_tag not in tags_of(template):
+            errors.append(f"{where}: нужен тег {expected_tag}")
 
     # Защитники везде, где они могут оказаться.
     for service in services.values():

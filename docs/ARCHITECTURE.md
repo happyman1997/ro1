@@ -18,6 +18,7 @@
 | `GuardAIService` | обнаружение и атака охраной и турелями | Plot, Class, Net |
 | `WeaponService` | выдача оружия, стрельба, урон, разрушение, блик прицела | Class, Combat, Data, GuardAI, Net, Plot |
 | `CombatService` | кто кого ранил, выпадение денег при гибели, штраф за выход из боя | Data, Net |
+| `DefenseService` | наём и увольнение охраны в слоты, замена павших | Data, Net, Plot |
 | `LeaderstatsService` | таблица игроков (витрина) | Data |
 
 Зависимости идут в одну сторону, циклов нет. Сервисы ниже по таблице
@@ -36,7 +37,6 @@
 |---|---|---|
 | `AbilityService` | способности классов: подавление, щит, метки разведчика, заряды подрывника | `Config/Classes`, `CombatService:recordDamage` |
 | `ShopService` | покупка оружия и улучшений за Cash | `WeaponService:giveWeapon`, `Config/Weapons.Price` |
-| `DefenseService` | наём и увольнение охраны в слоты | `Restaurant.Defense` в данных, теги `DefenseSlot` |
 | `CustomerService` | NPC-клиенты, повара, официанты (визуальный слой) | `CashRegisterService:deposit` |
 | `MovementService` | серверная проверка скорости и телепортов | — |
 
@@ -87,6 +87,8 @@ PlayerData (Version = 2)
 | `UpgradeRestaurant` | → сервер | — | PlotService |
 | `RepairRestaurant` | → сервер | — | RestaurantService |
 | `Fire` | → сервер | `direction` | WeaponService |
+| `HireDefender` | → сервер | `slotId, defenderType` | DefenseService |
+| `DismissDefender` | → сервер | `slotId` | DefenseService |
 
 Касса работает через `ProximityPrompt`: «Забрать выручку» (E) и «Взломать» (F).
 `Triggered` для сервера — такой же ввод клиента: лимит частоты, проверка роли,
@@ -123,9 +125,20 @@ ServerStorage
    ├─ Tier2 …
    ├─ Tier3 …
    └─ Tier4 …
-└─ Weapons
-   └─ Pistol, Rifle, Sniper (Tool с Handle, атрибут WeaponId)
+├─ Weapons
+│  └─ Pistol, Rifle, Sniper (Tool с Handle, атрибут WeaponId)
+└─ Defenders
+   └─ Bouncer, Gunner, CeilingTurret (Model с тегом Guard/Turret, пивот — «ноги» или центр турели)
 ```
+
+Слоты охраны в моделях уровней (`DefenseSlots`, тег `DefenseSlot`):
+
+| Уровень | Слоты |
+|---|---|
+| Tier 1 | `Door1` (охранник) |
+| Tier 2 | `Door1`, `Hall1` |
+| Tier 3 | `Door1`, `Hall1`, `Ceiling1` (турель) |
+| Tier 4 | `Door1`, `Hall1`, `Ceiling1`, `Ceiling2` |
 
 **Почему ServerStorage.** Всё содержимое ReplicatedStorage скачивается каждому
 клиенту при входе. Это четыре полных здания на каждого игрока, и вдобавок
@@ -280,6 +293,7 @@ Tier 4.
 | Лечение сменой класса | при смене сохраняется доля здоровья |
 | Бесплатный ремонт перезаходом | `NeedsRepair` сохраняется в данных |
 | Мгновенный ремонт посреди штурма | ремонт и улучшение запрещены 20 с после боя |
+| Мгновенное подкрепление посреди штурма | наём охраны запрещён 20 с после боя; павшие возвращаются только без боя |
 | Двойное списание или зачисление пачкой запросов | проверка и запись без yield между ними |
 | Выход из игры, чтобы спасти кассу | касса не сохраняется |
 | Выход из игры, чтобы не терять кошелёк при смерти | выход в течение 15 с после урона = 20% кошелька остаются лежать на месте (CombatService) |
@@ -320,6 +334,9 @@ CI собирает файл места после каждого пуша: **Ac
 | `/repair` | починить ресторан |
 | `/class Stealth` | сменить класс (на своей территории) |
 | `/weapon Sniper` | получить оружие (Pistol, Rifle, Sniper) |
+| `/slots` | слоты охраны в своём ресторане |
+| `/hire Door1 Bouncer` | нанять охрану в слот |
+| `/dismiss Door1` | уволить охрану (возврат 50%) |
 | `/fill` | заполнить свою кассу |
 | `/break` | сломать мебель — ресторан остановится |
 

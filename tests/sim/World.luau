@@ -83,7 +83,14 @@ local PROPS = {
 	},
 	SpawnLocation = { Neutral = true, Duration = 10, Enabled = true, AllowTeamChangeOnTouch = false },
 	Model = { PrimaryPart = NIL, WorldPivot = CFrame.new() },
-	Humanoid = { Health = 100, MaxHealth = 100, WalkSpeed = 16, JumpPower = 50 },
+	Humanoid = {
+		Health = 100,
+		MaxHealth = 100,
+		WalkSpeed = 16,
+		JumpPower = 50,
+		RequiresNeck = true,
+		BreakJointsOnDeath = true,
+	},
 	Attachment = { CFrame = CFrame.new() },
 	ProximityPrompt = {
 		Enabled = true,
