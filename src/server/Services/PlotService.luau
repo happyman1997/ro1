@@ -296,6 +296,39 @@ function PlotService:onRestaurantBuilt(callback: (Plot, Model) -> ()): Signal.Co
 	return PlotService.RestaurantBuilt:Connect(callback)
 end
 
+-- Улучшить ресторан игрока до следующего уровня (вызывают Remote и чат-команды).
+function PlotService:upgrade(player: Player)
+	local plot = plotByPlayer[player]
+	local data = DataService:get(player)
+	if plot == nil or data == nil then
+		return
+	end
+	local nextTier = plot.tier + 1
+	local info = Tiers[nextTier]
+	if info == nil then
+		NetService:notify(player, "Ресторан уже максимального уровня")
+		return
+	end
+	if PlotService:isInCombat(plot) then
+		NetService:notify(player, "Нельзя улучшать ресторан во время атаки")
+		return
+	end
+	if data.Cash < info.UpgradeCost then
+		NetService:notify(player, `Улучшение стоит ${info.UpgradeCost}`)
+		return
+	end
+
+	-- Проверка и списание без yield между ними: двойного списания или
+	-- двойного улучшения при пачке одинаковых запросов не будет.
+	DataService:increment(player, "Cash", -info.UpgradeCost)
+	DataService:update(player, "Restaurant", function(restaurant)
+		restaurant.Tier = nextTier
+		return restaurant
+	end)
+	buildRestaurant(plot, nextTier)
+	NetService:notify(player, `Ресторан улучшен: {info.Name}`)
+end
+
 --------------------------------------------------------------------------------
 -- Жизненный цикл
 --------------------------------------------------------------------------------
@@ -323,35 +356,7 @@ function PlotService:Start()
 	Players.PlayerRemoving:Connect(release)
 
 	NetService:on("UpgradeRestaurant", { args = {}, rate = 1, burst = 2 }, function(player: Player)
-		local plot = plotByPlayer[player]
-		local data = DataService:get(player)
-		if plot == nil or data == nil then
-			return
-		end
-		local nextTier = plot.tier + 1
-		local info = Tiers[nextTier]
-		if info == nil then
-			NetService:notify(player, "Ресторан уже максимального уровня")
-			return
-		end
-		if PlotService:isInCombat(plot) then
-			NetService:notify(player, "Нельзя улучшать ресторан во время атаки")
-			return
-		end
-		if data.Cash < info.UpgradeCost then
-			NetService:notify(player, `Улучшение стоит ${info.UpgradeCost}`)
-			return
-		end
-
-		-- Проверка и списание без yield между ними: двойного списания или
-		-- двойного улучшения при пачке одинаковых запросов не будет.
-		DataService:increment(player, "Cash", -info.UpgradeCost)
-		DataService:update(player, "Restaurant", function(restaurant)
-			restaurant.Tier = nextTier
-			return restaurant
-		end)
-		buildRestaurant(plot, nextTier)
-		NetService:notify(player, `Ресторан улучшен: {info.Name}`)
+		PlotService:upgrade(player)
 	end)
 end
 

@@ -1,0 +1,227 @@
+{
+  "ClassName": "Model",
+  "Properties": {
+    "Tags": [
+      "Plot"
+    ],
+    "WorldPivot": {
+      "CFrame": {
+        "position": [
+          -105,
+          0,
+          0
+        ],
+        "orientation": [
+          [
+            1,
+            0,
+            0
+          ],
+          [
+            0,
+            1,
+            0
+          ],
+          [
+            0,
+            0,
+            1
+          ]
+        ]
+      }
+    }
+  },
+  "Children": [
+    {
+      "Name": "Origin",
+      "ClassName": "Part",
+      "Properties": {
+        "Anchored": true,
+        "Size": [
+          1,
+          1,
+          1
+        ],
+        "CFrame": {
+          "CFrame": {
+            "position": [
+              -105,
+              0,
+              0
+            ],
+            "orientation": [
+              [
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0
+              ],
+              [
+                0,
+                0,
+                1
+              ]
+            ]
+          }
+        },
+        "Color": [
+          1,
+          1,
+          1
+        ],
+        "Material": "SmoothPlastic",
+        "TopSurface": "Smooth",
+        "BottomSurface": "Smooth"
+      }
+    },
+    {
+      "Name": "Territory",
+      "ClassName": "Part",
+      "Properties": {
+        "Anchored": true,
+        "Size": [
+          60,
+          40,
+          60
+        ],
+        "CFrame": {
+          "CFrame": {
+            "position": [
+              -105,
+              20,
+              0
+            ],
+            "orientation": [
+              [
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0
+              ],
+              [
+                0,
+                0,
+                1
+              ]
+            ]
+          }
+        },
+        "Color": [
+          1,
+          1,
+          1
+        ],
+        "Material": "SmoothPlastic",
+        "TopSurface": "Smooth",
+        "BottomSurface": "Smooth",
+        "Transparency": 1,
+        "CanCollide": false,
+        "CanTouch": false,
+        "CanQuery": false
+      }
+    },
+    {
+      "Name": "Pad",
+      "ClassName": "Part",
+      "Properties": {
+        "Anchored": true,
+        "Size": [
+          60,
+          0.2,
+          60
+        ],
+        "CFrame": {
+          "CFrame": {
+            "position": [
+              -105,
+              0.1,
+              0
+            ],
+            "orientation": [
+              [
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0
+              ],
+              [
+                0,
+                0,
+                1
+              ]
+            ]
+          }
+        },
+        "Color": [
+          0.55,
+          0.53,
+          0.5
+        ],
+        "Material": "Concrete",
+        "TopSurface": "Smooth",
+        "BottomSurface": "Smooth"
+      }
+    },
+    {
+      "Name": "Spawn",
+      "ClassName": "SpawnLocation",
+      "Properties": {
+        "Anchored": true,
+        "Size": [
+          6,
+          1,
+          6
+        ],
+        "CFrame": {
+          "CFrame": {
+            "position": [
+              -105,
+              0.7,
+              25
+            ],
+            "orientation": [
+              [
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0
+              ],
+              [
+                0,
+                0,
+                1
+              ]
+            ]
+          }
+        },
+        "Color": [
+          0.9,
+          0.8,
+          0.3
+        ],
+        "Material": "SmoothPlastic",
+        "TopSurface": "Smooth",
+        "BottomSurface": "Smooth",
+        "Neutral": false,
+        "AllowTeamChangeOnTouch": false,
+        "Duration": 3
+      }
+    }
+  ]
+}

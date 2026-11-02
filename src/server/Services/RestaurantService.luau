@@ -140,6 +140,34 @@ function RestaurantService:isOperational(plot: Plot): boolean
 	return state ~= nil and state.operational
 end
 
+-- Оплатить ремонт ресторана игрока (вызывают Remote и чат-команды).
+function RestaurantService:repair(player: Player)
+	local plot = PlotService:getPlot(player)
+	local data = DataService:get(player)
+	local state = if plot then states[plot] else nil
+	if plot == nil or data == nil or state == nil then
+		return
+	end
+	if checkOperational(plot, state) then
+		NetService:notify(player, "Ресторан в порядке, ремонт не нужен")
+		return
+	end
+	if PlotService:isInCombat(plot) then
+		NetService:notify(player, "Нельзя чинить ресторан во время атаки")
+		return
+	end
+	local cost = Tiers[plot.tier].RepairCost
+	if data.Cash < cost then
+		NetService:notify(player, `Ремонт стоит ${cost}`)
+		return
+	end
+
+	DataService:increment(player, "Cash", -cost)
+	saveNeedsRepair(plot, false) -- до перестройки: onRestaurantBuilt читает этот флаг
+	PlotService:rebuild(plot) -- новая модель: целые стены, мебель, живой персонал
+	NetService:notify(player, "Ресторан отремонтирован")
+end
+
 function RestaurantService:Start()
 	PlotService:onRestaurantBuilt(onRestaurantBuilt)
 	PlotService.RestaurantRemoving:Connect(function(plot: Plot)
@@ -147,30 +175,7 @@ function RestaurantService:Start()
 	end)
 
 	NetService:on("RepairRestaurant", { args = {}, rate = 1, burst = 2 }, function(player: Player)
-		local plot = PlotService:getPlot(player)
-		local data = DataService:get(player)
-		local state = if plot then states[plot] else nil
-		if plot == nil or data == nil or state == nil then
-			return
-		end
-		if checkOperational(plot, state) then
-			NetService:notify(player, "Ресторан в порядке, ремонт не нужен")
-			return
-		end
-		if PlotService:isInCombat(plot) then
-			NetService:notify(player, "Нельзя чинить ресторан во время атаки")
-			return
-		end
-		local cost = Tiers[plot.tier].RepairCost
-		if data.Cash < cost then
-			NetService:notify(player, `Ремонт стоит ${cost}`)
-			return
-		end
-
-		DataService:increment(player, "Cash", -cost)
-		saveNeedsRepair(plot, false) -- до перестройки: onRestaurantBuilt читает этот флаг
-		PlotService:rebuild(plot) -- новая модель: целые стены, мебель, живой персонал
-		NetService:notify(player, "Ресторан отремонтирован")
+		RestaurantService:repair(player)
 	end)
 
 	task.spawn(function()

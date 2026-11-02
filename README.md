@@ -30,8 +30,11 @@
    В Studio: вкладка **Plugins → Rojo → Connect**. Код из `src/` появится
    в нужных сервисах и будет обновляться при каждом сохранении файла.
 
-4. Соберите тестовую сцену (участок и шаблон ресторана) по инструкции
-   из [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md#10-как-собрать-тестовую-сцену).
+4. Нажмите Play: тестовая карта уже в проекте. Список чат-команд для проверки —
+   `/help` (подробности в [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md#10-тестовая-сцена)).
+
+Без установки инструментов: на GitHub откройте **Actions → последний запуск →
+Artifacts → `ro1-place`**, скачайте архив, распакуйте и откройте `ro1.rbxlx` в Studio.
 
 Без Rojo можно собрать готовый файл места и открыть его в Studio:
 
@@ -73,6 +76,7 @@ src/server  → ServerScriptService.Server        (клиенту не видн�
     GuardAIService      — ИИ охраны и турелей
     LeaderstatsService  — таблица игроков (только витрина)
     SettingsService     — образец запроса клиент → сервер
+    DevCommandsService  — чат-команды для тестов (только в Studio)
   Modules/
     RateLimiter    — «ведро токенов»
     Migrations     — миграции формата данных
@@ -89,10 +93,14 @@ src/client  → StarterPlayerScripts.Client
     EffectsController      — трассеры выстрелов охраны
   Modules/
     Net            — fire() на сервер, on() от сервера
+
+scene/      → тестовая карта: участки (Workspace.Plots) и модели уровней
+              (ServerStorage.Restaurants) в формате .model.json
+tools/      → check_scene.py — проверка сцены в CI
 ```
 
-Карта, участки и модели уровней (`ServerStorage/Restaurants`) строятся в Studio
-и хранятся в самом месте (place), а не в git.
+Тестовая карта хранится в git (`scene/`), поэтому её видно в истории и её проверяет
+CI. Настоящие модели из Studio сохраняются в `.rbxmx` и подключаются так же.
 Rojo управляет только папками, перечисленными в `default.project.json`.
 
 ## Правила проекта
