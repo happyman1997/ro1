@@ -1394,7 +1394,16 @@ function World:removePlayer(player)
 end
 
 -- Переместить персонажа (позиция корня; голова на 1,5 выше).
+-- Телепорт по воле сервера (через MovementService:teleport, как делает сама игра).
+-- Для подготовки сцены в тестах.
 function World:moveTo(player, position)
+	local movement = self:module("ServerScriptService.Server.Services.MovementService")
+	movement:teleport(player, CFrame.new(position))
+end
+
+-- Перемещение «от клиента»: персонаж просто оказался в новой точке.
+-- Так выглядит и честная ходьба, и телепорт из эксплойта — проверяет MovementService.
+function World:rawMove(player, position)
 	local character = player.Character
 	character.HumanoidRootPart.CFrame = CFrame.new(position)
 	character.Head.CFrame = CFrame.new(position + Vector3.new(0, 1.5, 0))
