@@ -1020,6 +1020,123 @@
           }
         }
       ]
+    },
+    {
+      "Name": "Staff",
+      "ClassName": "Folder",
+      "Children": [
+        {
+          "Name": "Chef",
+          "ClassName": "Model",
+          "Properties": {
+            "Tags": [
+              "Staff"
+            ]
+          },
+          "Children": [
+            {
+              "Name": "Humanoid",
+              "ClassName": "Humanoid",
+              "Properties": {
+                "RequiresNeck": false,
+                "BreakJointsOnDeath": false
+              }
+            },
+            {
+              "Name": "HumanoidRootPart",
+              "ClassName": "Part",
+              "Properties": {
+                "Anchored": true,
+                "Size": [
+                  2,
+                  5,
+                  1
+                ],
+                "CFrame": {
+                  "CFrame": {
+                    "position": [
+                      -4.5,
+                      2.9,
+                      -6.0
+                    ],
+                    "orientation": [
+                      [
+                        1,
+                        0,
+                        0
+                      ],
+                      [
+                        0,
+                        1,
+                        0
+                      ],
+                      [
+                        0,
+                        0,
+                        1
+                      ]
+                    ]
+                  }
+                },
+                "Color": [
+                  0.95,
+                  0.95,
+                  0.95
+                ],
+                "Material": "SmoothPlastic",
+                "TopSurface": "Smooth",
+                "BottomSurface": "Smooth"
+              }
+            },
+            {
+              "Name": "Head",
+              "ClassName": "Part",
+              "Properties": {
+                "Anchored": true,
+                "Size": [
+                  1.2,
+                  1.2,
+                  1.2
+                ],
+                "CFrame": {
+                  "CFrame": {
+                    "position": [
+                      -4.5,
+                      6.0,
+                      -6.0
+                    ],
+                    "orientation": [
+                      [
+                        1,
+                        0,
+                        0
+                      ],
+                      [
+                        0,
+                        1,
+                        0
+                      ],
+                      [
+                        0,
+                        0,
+                        1
+                      ]
+                    ]
+                  }
+                },
+                "Color": [
+                  0.95,
+                  0.8,
+                  0.65
+                ],
+                "Material": "SmoothPlastic",
+                "TopSurface": "Smooth",
+                "BottomSurface": "Smooth"
+              }
+            }
+          ]
+        }
+      ]
     }
   ]
 }
