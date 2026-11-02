@@ -63,6 +63,7 @@ src/shared  → ReplicatedStorage.Shared          (видно серверу и 
     Tiers        — уровни ресторана: доход, касса, ремонт, время взлома
     Defense      — типы охраны: обзор, урон, правило обнаружения
     Classes      — RPG-классы: здоровье, скорость, маскировка, приоритет у охраны
+    Weapons      — оружие: урон, темп, дальность, разброс, время доставания, оптика
 
 src/server  → ServerScriptService.Server        (клиенту не видно)
   Main.server    — единственный Script, запускает Services
@@ -74,6 +75,7 @@ src/server  → ServerScriptService.Server        (клиенту не видн�
     CashRegisterService — касса: выручка, сбор владельцем, взлом
     RestaurantService   — доход, остановка при разрушении, ремонт
     GuardAIService      — ИИ охраны и турелей
+    WeaponService       — оружие: выдача, стрельба, урон, разрушение, блик
     LeaderstatsService  — таблица игроков (только витрина)
     SettingsService     — образец запроса клиент → сервер
     DevCommandsService  — чат-команды для тестов (только в Studio)
@@ -90,12 +92,13 @@ src/client  → StarterPlayerScripts.Client
     SettingsController     — изменение настроек
     NotificationController — уведомления от сервера
     RegisterController     — показ нужной подсказки у кассы
-    EffectsController      — трассеры выстрелов охраны
+    EffectsController      — трассеры выстрелов
+    WeaponController       — выстрелы и приближение прицела
   Modules/
     Net            — fire() на сервер, on() от сервера
 
-scene/      → тестовая карта: участки (Workspace.Plots) и модели уровней
-              (ServerStorage.Restaurants) в формате .model.json
+scene/      → тестовая карта: участки (Workspace.Plots), модели уровней
+              (ServerStorage.Restaurants) и оружие (ServerStorage.Weapons), .model.json
 tools/      → check_scene.py — проверка сцены в CI
 tests/      → симулятор сервера (sim/) и сценарии (specs/), запуск — run.luau
 ```
@@ -179,7 +182,8 @@ luau-lsp в VS Code, чтобы понимать пути вида `script.Paren
 Он запускает настоящий серверный код из собранного места: игроки, персонажи,
 лучи видимости, события, виртуальное время. Сценарии в `tests/specs`: доход
 и касса, улучшение и ремонт, охрана и турели, бронестекло, взлом и поимка вора,
-проверки Remote и анти-флуд.
+стрельба (время доставания, темп, прострел материалов, разрушение мебели и стекла,
+урон по турелям, блик прицела), проверки Remote и анти-флуд.
 
 ```bash
 rojo build default.project.json -o build/ro1.rbxlx

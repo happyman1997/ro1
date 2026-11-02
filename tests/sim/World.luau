@@ -21,6 +21,8 @@ local Vector3 = roblox.Vector3
 local CFrame = roblox.CFrame
 local Color3 = roblox.Color3
 local Enum = roblox.Enum
+local UDim = roblox.UDim
+local UDim2 = roblox.UDim2
 
 local World = {}
 World.__index = World
@@ -100,6 +102,22 @@ local PROPS = {
 	LuaSourceContainer = { Source = "" },
 	Player = { UserId = 0, DisplayName = "", Character = NIL, RespawnLocation = NIL },
 	TextChatCommand = { PrimaryAlias = "", SecondaryAlias = "", Enabled = true },
+	BillboardGui = {
+		Size = UDim2.new(),
+		AlwaysOnTop = false,
+		LightInfluence = 1,
+		MaxDistance = math.huge,
+		StudsOffset = Vector3.new(),
+		Adornee = NIL,
+		Enabled = true,
+	},
+	Frame = {
+		Size = UDim2.new(),
+		BackgroundColor3 = Color3.new(1, 1, 1),
+		BackgroundTransparency = 0,
+		BorderSizePixel = 1,
+	},
+	UICorner = { CornerRadius = UDim.new() },
 	DataModel = { PlaceId = 0, GameId = 0, JobId = "" },
 }
 
@@ -1228,6 +1246,8 @@ function World:_buildEnv()
 		CFrame = cframeLib,
 		Color3 = Color3,
 		Enum = Enum,
+		UDim = UDim,
+		UDim2 = UDim2,
 		Random = { new = newRandom },
 		RaycastParams = { new = newRaycastParams },
 	}
@@ -1361,13 +1381,28 @@ function World:humanoid(player)
 	return player.Character and player.Character:FindFirstChildOfClass("Humanoid")
 end
 
--- Взять в руки тестовое оружие из StarterPack.
-function World:equip(player)
-	local template = self.game:GetService("StarterPack"):FindFirstChildWhichIsA("Tool")
-	local tool = player.Backpack:FindFirstChildWhichIsA("Tool") or template:Clone()
+-- Взять в руки оружие из рюкзака (по WeaponId или первое попавшееся).
+function World:equip(player, weaponId: string?)
+	local current = player.Character:FindFirstChildWhichIsA("Tool")
+	if current then
+		current.Parent = player.Backpack
+	end
+	local tool = nil
+	for _, child in player.Backpack:GetChildren() do
+		if self:_isA(child, "Tool") and (weaponId == nil or child:GetAttribute("WeaponId") == weaponId) then
+			tool = child
+			break
+		end
+	end
+	assert(tool, `в рюкзаке нет оружия {weaponId or ""}`)
 	tool.Parent = player.Character
 	self:_flushDeferred()
 	return tool
+end
+
+-- Направление от головы игрока к точке (для события Fire).
+function World:aimAt(player, target)
+	return (target - player.Character.Head.Position).Unit
 end
 
 function World:unequip(player)

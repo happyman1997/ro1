@@ -453,7 +453,14 @@
             "BottomSurface": "Smooth",
             "Tags": [
               "Furniture"
-            ]
+            ],
+            "Attributes": {
+              "Attributes": {
+                "MaxHealth": {
+                  "Float64": 150.0
+                }
+              }
+            }
           }
         },
         {
@@ -502,7 +509,14 @@
             "BottomSurface": "Smooth",
             "Tags": [
               "Furniture"
-            ]
+            ],
+            "Attributes": {
+              "Attributes": {
+                "MaxHealth": {
+                  "Float64": 200.0
+                }
+              }
+            }
           }
         },
         {
@@ -551,7 +565,14 @@
             "BottomSurface": "Smooth",
             "Tags": [
               "Furniture"
-            ]
+            ],
+            "Attributes": {
+              "Attributes": {
+                "MaxHealth": {
+                  "Float64": 80.0
+                }
+              }
+            }
           }
         },
         {
@@ -600,7 +621,14 @@
             "BottomSurface": "Smooth",
             "Tags": [
               "Furniture"
-            ]
+            ],
+            "Attributes": {
+              "Attributes": {
+                "MaxHealth": {
+                  "Float64": 80.0
+                }
+              }
+            }
           }
         },
         {
@@ -649,7 +677,14 @@
             "BottomSurface": "Smooth",
             "Tags": [
               "Furniture"
-            ]
+            ],
+            "Attributes": {
+              "Attributes": {
+                "MaxHealth": {
+                  "Float64": 80.0
+                }
+              }
+            }
           }
         },
         {
@@ -698,7 +733,14 @@
             "BottomSurface": "Smooth",
             "Tags": [
               "Furniture"
-            ]
+            ],
+            "Attributes": {
+              "Attributes": {
+                "MaxHealth": {
+                  "Float64": 80.0
+                }
+              }
+            }
           }
         }
       ]

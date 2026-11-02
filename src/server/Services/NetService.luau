@@ -167,6 +167,24 @@ function NetService:fireAllClients(name: string, ...: any)
 	remotes[name]:FireAllClients(...)
 end
 
+-- Отправить событие игрокам, чьи персонажи ближе radius к точке (эффекты выстрелов и т. п.).
+-- except — игрок, которому не отправлять (например, стрелок сам рисует свой трассер).
+function NetService:fireNearby(position: Vector3, radius: number, except: Player?, name: string, ...: any)
+	assert(
+		getInfo(name).direction == "ToClient",
+		`NetService: «{name}» — событие клиент → сервер`
+	)
+	for _, player in Players:GetPlayers() do
+		if player ~= except then
+			local character = player.Character
+			local root = if character then character:FindFirstChild("HumanoidRootPart") else nil
+			if root and root:IsA("BasePart") and ((root :: BasePart).Position - position).Magnitude <= radius then
+				remotes[name]:FireClient(player, ...)
+			end
+		end
+	end
+end
+
 -- Показать игроку текстовое уведомление (обрабатывает NotificationController).
 function NetService:notify(player: Player, text: string)
 	if player.Parent == Players then

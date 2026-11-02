@@ -13,6 +13,7 @@
 	/upgrade          улучшить ресторан
 	/repair           починить ресторан
 	/class <класс>    сменить класс (на своей территории)
+	/weapon <оружие>  получить оружие (Pistol, Rifle, Sniper)
 	/fill             заполнить свою кассу до предела
 	/break            сломать мебель в своём ресторане
 ]]
@@ -31,6 +32,8 @@ local DataService = require(script.Parent.DataService)
 local NetService = require(script.Parent.NetService)
 local PlotService = require(script.Parent.PlotService)
 local RestaurantService = require(script.Parent.RestaurantService)
+local WeaponService = require(script.Parent.WeaponService)
+local Weapons = require(ReplicatedStorage.Shared.Config.Weapons)
 
 local MAX_CASH_PER_COMMAND = 1_000_000
 
@@ -98,6 +101,20 @@ commands.class = {
 			return
 		end
 		ClassService:selectClass(player, classId)
+	end,
+}
+
+commands.weapon = {
+	usage = `/weapon <{table.concat(sortedKeys(Weapons), "|")}> — получить оружие`,
+	run = function(player: Player, args: { string })
+		local weaponId = args[1]
+		if weaponId == nil or Weapons[weaponId] == nil then
+			NetService:notify(player, `Оружие: {table.concat(sortedKeys(Weapons), ", ")}`)
+			return
+		end
+		if WeaponService:giveWeapon(player, weaponId) then
+			NetService:notify(player, `Получено: {Weapons[weaponId].Name}`)
+		end
 	end,
 }
 
