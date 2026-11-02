@@ -45,6 +45,8 @@ local Remotes: { [string]: RemoteInfo } = {
 	PartyInvite = { direction = "ToClient", kind = "Reliable" },
 	-- Состав группы: ({ userId }); пустой список — не в группе.
 	PartyUpdate = { direction = "ToClient", kind = "Reliable" },
+	-- Глобальные рейтинги: ({ [boardId]: { { userId, name, value } } }).
+	LeaderboardUpdate = { direction = "ToClient", kind = "Reliable" },
 
 	-- Игрок меняет свою настройку: (имя настройки, значение).
 	ChangeSetting = { direction = "ToServer", kind = "Reliable" },

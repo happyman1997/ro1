@@ -4,9 +4,9 @@
 
 	• Сверху слева: деньги, уровень ресторана, состояние («работает» / «стоит»).
 	• Снизу: «Улучшить», «Починить» (только когда ресторан стоит), «Охрана»,
-	  «Магазин», «Класс», «Группа».
+	  «Магазин», «Класс», «Группа», «Рейтинг».
 	• Панели: охрана (наём и увольнение по слотам), магазин оружия, выбор класса,
-	  группа (приглашения, состав, выход).
+	  группа (приглашения, состав, выход), глобальные рейтинги.
 
 	Интерфейс только отправляет просьбы серверу (Net.fire) и показывает данные
 	из StateController и атрибутов своего участка. Цены и доступность здесь —
@@ -22,11 +22,13 @@ local Config = Shared:WaitForChild("Config")
 local Abilities = require(Config:WaitForChild("Abilities"))
 local Classes = require(Config:WaitForChild("Classes"))
 local Defense = require(Config:WaitForChild("Defense"))
+local Leaderboards = require(Config:WaitForChild("Leaderboards"))
 local PartyConfig = require(Config:WaitForChild("Party"))
 local Tiers = require(Config:WaitForChild("Tiers"))
 local Weapons = require(Config:WaitForChild("Weapons"))
 local Net = require(script.Parent.Parent:WaitForChild("Modules"):WaitForChild("Net"))
 local AbilityController = require(script.Parent:WaitForChild("AbilityController"))
+local LeaderboardController = require(script.Parent:WaitForChild("LeaderboardController"))
 local PartyController = require(script.Parent:WaitForChild("PartyController"))
 local StateController = require(script.Parent:WaitForChild("StateController"))
 
@@ -419,6 +421,35 @@ panelBuilders.PartyPanel = function(list: Instance)
 	end
 end
 
+panelBuilders.LeaderboardPanel = function(list: Instance)
+	local order = 0
+	for _, boardId in
+		sortedKeys(Leaderboards.Boards, function(key)
+			return Leaderboards.Boards[key].Order
+		end)
+	do
+		order += 1
+		local header = makeRow(list, `Board_{boardId}`, Leaderboards.Boards[boardId].Title, order)
+		local headerLabel = header:FindFirstChild("Label") :: TextLabel
+		headerLabel.Font = Enum.Font.GothamBold
+		headerLabel.TextColor3 = COLORS.accent
+		local rows = LeaderboardController:getBoard(boardId)
+		if #rows == 0 then
+			order += 1
+			makeRow(list, `Empty_{boardId}`, "Пока пусто", order)
+		end
+		for rank, row in rows do
+			order += 1
+			local mine = if row.userId == localPlayer.UserId then " (вы)" else ""
+			local line =
+				makeRow(list, `Rank_{boardId}_{rank}`, `{rank}. {row.name}{mine} — {formatMoney(row.value)}`, order)
+			if mine ~= "" then
+				line.BackgroundColor3 = COLORS.good
+			end
+		end
+	end
+end
+
 local function rebuildPanel(name: string)
 	local panel: Frame? = panels[name]
 	local builder: ((list: Instance) -> ())? = panelBuilders[name]
@@ -531,16 +562,32 @@ local function build()
 	buttons.PartyTab = makeButton("PartyTab", "Группа", bar, function()
 		togglePanel("PartyPanel")
 	end)
+	buttons.LeaderboardTab = makeButton("LeaderboardTab", "Рейтинг", bar, function()
+		togglePanel("LeaderboardPanel")
+	end)
 	for order, name in
-		{ "UpgradeButton", "RepairButton", "AbilityButton", "DefenseTab", "ShopTab", "ClassTab", "PartyTab" }
+		{
+			"UpgradeButton",
+			"RepairButton",
+			"AbilityButton",
+			"DefenseTab",
+			"ShopTab",
+			"ClassTab",
+			"PartyTab",
+			"LeaderboardTab",
+		}
 	do
 		buttons[name].LayoutOrder = order
+		if string.find(name, "Tab$") then
+			buttons[name].Size = UDim2.new(0, 110, 0, 44) -- вкладки уже, чтобы ряд помещался
+		end
 	end
 
 	makePanel("DefensePanel", "Охрана ресторана")
 	makePanel("ShopPanel", "Магазин оружия")
 	makePanel("ClassPanel", "Класс")
 	makePanel("PartyPanel", "Группа")
+	makePanel("LeaderboardPanel", "Рейтинг")
 end
 
 -- Следим за атрибутами своего участка (владелец, уровень, «работает»).
@@ -562,6 +609,7 @@ function HudController:Start()
 	StateController.Loaded:Connect(refreshAll)
 	StateController.Changed:Connect(refreshAll)
 	PartyController.Changed:Connect(refreshAll)
+	LeaderboardController.Changed:Connect(refreshAll)
 	watchPlots()
 	refreshAll()
 end

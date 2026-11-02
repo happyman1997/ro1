@@ -92,6 +92,7 @@ local pendingOperations = 0 -- активные загрузки и финаль
 local isShuttingDown = false
 
 -- Задаётся в Init: настоящий DataStore или временное хранилище в памяти.
+local persistent = false -- true, когда работает настоящий DataStore
 local updateAsync: UpdateAsync = function()
 	error("DataService не инициализирован")
 end
@@ -440,6 +441,12 @@ function DataService:get(player: Player): PlayerData?
 	return if session then session.data else nil
 end
 
+-- Настоящий DataStore (true) или временное хранилище в памяти (Studio без публикации
+-- или без доступа к API). Другим сервисам с DataStore — чтобы вести себя так же.
+function DataService:isPersistent(): boolean
+	return persistent
+end
+
 function DataService:isLoaded(player: Player): boolean
 	return sessions[player] ~= nil
 end
@@ -515,6 +522,7 @@ end
 --------------------------------------------------------------------------------
 
 local function useMemoryStore(reason: string)
+	persistent = false
 	warn(
 		`[DataService] Сохранения работают в памяти ({reason}): прогресс пропадёт после остановки игры. `
 			.. "Для настоящих сохранений опубликуйте место (File → Publish to Roblox) и включите "
@@ -545,6 +553,7 @@ function DataService:Init()
 	end
 
 	if usable then
+		persistent = true
 		local dataStore = store :: DataStore
 		updateAsync = function(key: string, transform: Transform): any
 			return dataStore:UpdateAsync(key, transform :: any)
