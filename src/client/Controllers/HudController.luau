@@ -4,9 +4,9 @@
 
 	• Сверху слева: деньги, уровень ресторана, состояние («работает» / «стоит»).
 	• Снизу: «Улучшить», «Починить» (только когда ресторан стоит), «Охрана»,
-	  «Магазин», «Класс», «Группа», «Рейтинг».
+	  «Магазин», «Класс», «Группа», «Рейтинг», «Настройки».
 	• Панели: охрана (наём и увольнение по слотам), магазин оружия, выбор класса,
-	  группа (приглашения, состав, выход), глобальные рейтинги.
+	  группа (приглашения, состав, выход), глобальные рейтинги, настройки.
 
 	Интерфейс только отправляет просьбы серверу (Net.fire) и показывает данные
 	из StateController и атрибутов своего участка. Цены и доступность здесь —
@@ -30,6 +30,7 @@ local Net = require(script.Parent.Parent:WaitForChild("Modules"):WaitForChild("N
 local AbilityController = require(script.Parent:WaitForChild("AbilityController"))
 local LeaderboardController = require(script.Parent:WaitForChild("LeaderboardController"))
 local PartyController = require(script.Parent:WaitForChild("PartyController"))
+local SettingsController = require(script.Parent:WaitForChild("SettingsController"))
 local StateController = require(script.Parent:WaitForChild("StateController"))
 
 local localPlayer = Players.LocalPlayer
@@ -450,6 +451,14 @@ panelBuilders.LeaderboardPanel = function(list: Instance)
 	end
 end
 
+panelBuilders.SettingsPanel = function(list: Instance)
+	local tipsOn = SettingsController:get("ShowTips") ~= false
+	local row = makeRow(list, "Tips", "Подсказки для новичков", 1)
+	rowButton(row, "TipsToggle", if tipsOn then "Включены" else "Выключены", 1, function()
+		SettingsController:set("ShowTips", not tipsOn)
+	end)
+end
+
 local function rebuildPanel(name: string)
 	local panel: Frame? = panels[name]
 	local builder: ((list: Instance) -> ())? = panelBuilders[name]
@@ -565,6 +574,9 @@ local function build()
 	buttons.LeaderboardTab = makeButton("LeaderboardTab", "Рейтинг", bar, function()
 		togglePanel("LeaderboardPanel")
 	end)
+	buttons.SettingsTab = makeButton("SettingsTab", "Настройки", bar, function()
+		togglePanel("SettingsPanel")
+	end)
 	for order, name in
 		{
 			"UpgradeButton",
@@ -575,6 +587,7 @@ local function build()
 			"ClassTab",
 			"PartyTab",
 			"LeaderboardTab",
+			"SettingsTab",
 		}
 	do
 		buttons[name].LayoutOrder = order
@@ -588,6 +601,7 @@ local function build()
 	makePanel("ClassPanel", "Класс")
 	makePanel("PartyPanel", "Группа")
 	makePanel("LeaderboardPanel", "Рейтинг")
+	makePanel("SettingsPanel", "Настройки")
 end
 
 -- Следим за атрибутами своего участка (владелец, уровень, «работает»).

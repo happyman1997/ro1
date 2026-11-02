@@ -107,10 +107,11 @@ src/client  → StarterPlayerScripts.Client
     RegisterController     — показ нужной подсказки у кассы
     EffectsController      — трассеры выстрелов
     WeaponController       — выстрелы и приближение прицела
-    HudController          — интерфейс: деньги, улучшение, ремонт, охрана, магазин, класс, группа
+    HudController          — интерфейс: деньги, улучшение, ремонт, охрана, магазин, класс, группа, рейтинг, настройки
     AbilityController      — способность по Q, подсветка охраны от метки
     PartyController        — группа: состав, приглашения, подсветка союзников
     LeaderboardController  — рейтинги для панели «Рейтинг»
+    TipsController         — подсказки новичку (настройка ShowTips)
   Modules/
     Net            — fire() на сервер, on() от сервера
 
