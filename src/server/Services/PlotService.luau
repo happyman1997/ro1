@@ -29,6 +29,7 @@ local Signal = require(ReplicatedStorage.Shared.Signal)
 local Tiers = require(ReplicatedStorage.Shared.Config.Tiers)
 local DataService = require(script.Parent.DataService)
 local MovementService = require(script.Parent.MovementService)
+local PartyService = require(script.Parent.PartyService)
 local NetService = require(script.Parent.NetService)
 
 local PLOT_TAG = "Plot"
@@ -265,10 +266,11 @@ function PlotService:isOwner(plot: Plot, player: Player): boolean
 	return plot.owner == player
 end
 
--- Свой для охраны участка. Сейчас только владелец; сюда же добавятся
--- совладельцы и участники пати.
+-- Свой для участка: владелец или его союзник по группе (PartyService).
+-- Своих охрана не трогает, их пули и заряды не ломают ресторан, кассу не взломать.
 function PlotService:isFriendly(plot: Plot, player: Player): boolean
-	return plot.owner == player
+	local owner = plot.owner
+	return owner ~= nil and PartyService:areAllies(owner, player)
 end
 
 -- Отметить бой на территории (вызывают охрана и боевая система).

@@ -65,6 +65,7 @@ src/shared  → ReplicatedStorage.Shared          (видно серверу и 
     Classes      — RPG-классы: здоровье, скорость, маскировка, приоритет у охраны
     Weapons      — оружие: урон, темп, дальность, разброс, время доставания, оптика
     Abilities    — способности классов: перезарядка, длительность, радиус, урон
+    Party        — группы: размер, срок приглашения, защита от «удара в спину»
 
 src/server  → ServerScriptService.Server        (клиенту не видно)
   Main.server    — единственный Script, запускает Services
@@ -82,6 +83,7 @@ src/server  → ServerScriptService.Server        (клиенту не видн�
     ShopService         — покупка оружия за Cash
     MovementService     — защита от телепорта и спидхака, серверные телепорты
     AbilityService      — способности классов (Q): подавление, заряд, щит, метка
+    PartyService        — группы для рейдов: приглашения, союзники
     LeaderstatsService  — таблица игроков (только витрина)
     SettingsService     — образец запроса клиент → сервер
     DevCommandsService  — чат-команды для тестов (только в Studio)
@@ -101,8 +103,9 @@ src/client  → StarterPlayerScripts.Client
     RegisterController     — показ нужной подсказки у кассы
     EffectsController      — трассеры выстрелов
     WeaponController       — выстрелы и приближение прицела
-    HudController          — интерфейс: деньги, улучшение, ремонт, охрана, магазин, класс
+    HudController          — интерфейс: деньги, улучшение, ремонт, охрана, магазин, класс, группа
     AbilityController      — способность по Q, подсветка охраны от метки
+    PartyController        — группа: состав, приглашения, подсветка союзников
   Modules/
     Net            — fire() на сервер, on() от сервера
 

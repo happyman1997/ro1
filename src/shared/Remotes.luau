@@ -41,6 +41,10 @@ local Remotes: { [string]: RemoteInfo } = {
 	ExplosionFx = { direction = "ToClient", kind = "Unreliable" },
 	-- Метка разведчика: (защитники: { Model }, длительность: number).
 	MarkDefenders = { direction = "ToClient", kind = "Reliable" },
+	-- Приглашение в группу: (userId пригласившего, имя).
+	PartyInvite = { direction = "ToClient", kind = "Reliable" },
+	-- Состав группы: ({ userId }); пустой список — не в группе.
+	PartyUpdate = { direction = "ToClient", kind = "Reliable" },
 
 	-- Игрок меняет свою настройку: (имя настройки, значение).
 	ChangeSetting = { direction = "ToServer", kind = "Reliable" },
@@ -60,6 +64,12 @@ local Remotes: { [string]: RemoteInfo } = {
 	BuyWeapon = { direction = "ToServer", kind = "Reliable" },
 	-- Применить способность класса: (точка прицела: Vector3?).
 	UseAbility = { direction = "ToServer", kind = "Reliable" },
+	-- Пригласить игрока в группу: (userId).
+	InviteToParty = { direction = "ToServer", kind = "Reliable" },
+	-- Ответить на приглашение: (userId пригласившего, принять: boolean).
+	RespondPartyInvite = { direction = "ToServer", kind = "Reliable" },
+	-- Выйти из группы: ().
+	LeaveParty = { direction = "ToServer", kind = "Reliable" },
 }
 
 for _, info in Remotes do
