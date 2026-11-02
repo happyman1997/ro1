@@ -504,8 +504,16 @@
         "TopSurface": "Smooth",
         "BottomSurface": "Smooth",
         "Tags": [
-          "CashRegister"
-        ]
+          "CashRegister",
+          "Furniture"
+        ],
+        "Attributes": {
+          "Attributes": {
+            "MaxHealth": {
+              "Float64": 300.0
+            }
+          }
+        }
       }
     },
     {
