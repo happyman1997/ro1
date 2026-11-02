@@ -51,6 +51,7 @@ local Weapons = require(ReplicatedStorage.Shared.Config.Weapons)
 local AbilityService = require(script.Parent.AbilityService)
 local ClassService = require(script.Parent.ClassService)
 local CombatService = require(script.Parent.CombatService)
+local CustomerService = require(script.Parent.CustomerService)
 local DataService = require(script.Parent.DataService)
 local GuardAIService = require(script.Parent.GuardAIService)
 local NetService = require(script.Parent.NetService)
@@ -147,6 +148,11 @@ local function applyHit(shooter: Player, info: WeaponInfo, part: BasePart)
 	local plot = PlotService:getPlotFromInstance(part)
 	if plot and PlotService:isFriendly(plot, shooter) then
 		return -- свой ресторан и своя охрана не повреждаются
+	end
+
+	-- NPC-клиент: падает, но это ничего не даёт — ни денег, ни тревоги
+	if CustomerService:hit(part) then
+		return
 	end
 	local class = ClassService:getClass(shooter)
 

@@ -3,6 +3,8 @@
 Проверяет договорённости, на которые опирается код (docs/ARCHITECTURE.md, раздел «Сцена»):
   • для каждого уровня из Config/Tiers есть модель ServerStorage.Restaurants.<Model>;
   • в каждой модели уровня ровно одна касса (тег CashRegister) и есть мебель (тег Furniture);
+  • в каждой модели уровня есть маршрут клиентов: CustomerSpawn, ровно одна CustomerDoor
+    и CustomerOrder не меньше MaxCustomers из Config/Tiers;
   • у каждого защитника (тег Guard/Turret) атрибут DefenderType из Config/Defense
     и деталь, откуда он смотрит (Head или HumanoidRootPart);
   • в Workspace есть участки (тег Plot) с деталями Origin и Territory;
@@ -88,6 +90,8 @@ def child(item, name):
 
 def main(place: str) -> int:
     tier_models = config_keys(ROOT / "src/shared/Config/Tiers.luau", r'^\s*Model = "([^"]+)"')
+    tiers_text = (ROOT / "src/shared/Config/Tiers.luau").read_text(encoding="utf-8")
+    max_customers = dict(re.findall(r'Model = "([^"]+)".*?MaxCustomers = (\d+)', tiers_text, re.S))
     defender_types = config_keys(ROOT / "src/shared/Config/Defense.luau", r"^\t(\w+) = \{")
     weapon_ids = config_keys(ROOT / "src/shared/Config/Weapons.luau", r"^\t(\w+) = \{")
     root = ET.parse(place).getroot()
@@ -122,6 +126,17 @@ def main(place: str) -> int:
             duplicates = sorted({s for s in slot_ids if slot_ids.count(s) > 1 and s})
             if duplicates:
                 errors.append(f"{where}: повторяются SlotId {duplicates}")
+            def count(tag):
+                return sum(1 for _, i in items if tag in tags_of(i))
+            if count("CustomerSpawn") < 1:
+                errors.append(f"{where}: нет точки появления клиентов (тег CustomerSpawn)")
+            if count("CustomerDoor") != 1:
+                errors.append(f"{where}: точек CustomerDoor — {count('CustomerDoor')}, нужна ровно одна")
+            need = int(max_customers.get(model_name, 0))
+            if need == 0:
+                errors.append(f"{where}: в Config/Tiers нет MaxCustomers для этого уровня")
+            elif count("CustomerOrder") < need:
+                errors.append(f"{where}: мест у стойки (CustomerOrder) {count('CustomerOrder')}, а MaxCustomers = {need}")
 
     # Оружие.
     weapons = child(storage, "Weapons") if storage is not None else None

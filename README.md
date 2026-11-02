@@ -84,6 +84,7 @@ src/server  → ServerScriptService.Server        (клиенту не видн�
     MovementService     — защита от телепорта и спидхака, серверные телепорты
     AbilityService      — способности классов (Q): подавление, заряд, щит, метка
     PartyService        — группы для рейдов: приглашения, союзники
+    CustomerService     — NPC-клиенты у стойки (визуальный слой)
     LeaderstatsService  — таблица игроков (только витрина)
     SettingsService     — образец запроса клиент → сервер
     DevCommandsService  — чат-команды для тестов (только в Studio)
@@ -111,7 +112,7 @@ src/client  → StarterPlayerScripts.Client
 
 scene/      → тестовая карта: участки (Workspace.Plots), модели уровней
               (ServerStorage.Restaurants), оружие и шаблоны охраны (ServerStorage), .model.json
-tools/      → check_scene.py — проверка сцены в CI
+tools/      → gen_scene.py — генератор тестовой сцены (scene/), check_scene.py — проверка сцены в CI
 tests/      → симулятор сервера (sim/) и сценарии (specs/), запуск — run.luau
 ```
 

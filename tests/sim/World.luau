@@ -1167,6 +1167,41 @@ METHODS.DataStoreService = {
 	end,
 }
 
+-- Tween: без промежуточных кадров. Свойства получают конечные значения через
+-- info.Time секунд, затем срабатывает Completed. Логика игры не должна читать
+-- положение деталей посреди анимации (сервер считает его сам).
+METHODS.TweenService = {
+	Create = function(world, _self, instance, info, goals)
+		local tween = { PlaybackState = Enum.PlaybackState.Begin, Instance = instance }
+		tween.Completed = world:_signal()
+		local generation = 0
+		function tween:Play()
+			generation += 1
+			local mine = generation
+			tween.PlaybackState = Enum.PlaybackState.Playing
+			world.task.delay(info.Time, function()
+				if mine ~= generation or world.state[instance].destroyed then
+					return
+				end
+				for key, value in goals do
+					instance[key] = value
+				end
+				tween.PlaybackState = Enum.PlaybackState.Completed
+				tween.Completed:_fire(Enum.PlaybackState.Completed)
+			end)
+		end
+		function tween:Cancel()
+			if tween.PlaybackState ~= Enum.PlaybackState.Playing then
+				return
+			end
+			generation += 1
+			tween.PlaybackState = Enum.PlaybackState.Cancelled
+			tween.Completed:_fire(Enum.PlaybackState.Cancelled)
+		end
+		return tween
+	end,
+}
+
 METHODS.Debris = {
 	AddItem = function(world, _self, instance, lifetime)
 		world.task.delay(lifetime or 10, function()
@@ -1382,6 +1417,11 @@ function World:_buildEnv()
 		Vector2 = Vector2,
 		Random = { new = newRandom },
 		RaycastParams = { new = newRaycastParams },
+		TweenInfo = {
+			new = function(time, easingStyle, easingDirection)
+				return { Time = time or 1, EasingStyle = easingStyle, EasingDirection = easingDirection }
+			end,
+		},
 	}
 end
 
