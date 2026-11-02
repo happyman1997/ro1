@@ -1,6 +1,7 @@
 # Проверка кода на каждый пуш и пулл-реквест:
 #   rojo build      — проект собирается в файл места (его можно скачать: ro1-place)
 #   check_scene     — сцена соответствует договорённостям кода
+#   автотесты       — серверный код в симуляторе Roblox (tests/, Lune)
 #   luau-lsp        — типы в строгом режиме с описаниями API Roblox + линтер
 #   StyLua          — форматирование по stylua.toml
 #   selene          — линтер для Roblox
@@ -31,8 +32,8 @@ jobs:
         run: |
           # Версия инструмента из строки вида: rojo = "rojo-rbx/rojo@7.4.4"
           version() { sed -n "s/^$1 *= *\"[^@]*@\(.*\)\"/\1/p" rokit.toml; }
-          ROJO=$(version rojo); SELENE=$(version selene); STYLUA=$(version stylua); LUAU_LSP=$(version luau-lsp)
-          echo "rojo $ROJO, selene $SELENE, stylua $STYLUA, luau-lsp $LUAU_LSP"
+          ROJO=$(version rojo); SELENE=$(version selene); STYLUA=$(version stylua); LUAU_LSP=$(version luau-lsp); LUNE=$(version lune)
+          echo "rojo $ROJO, selene $SELENE, stylua $STYLUA, luau-lsp $LUAU_LSP, lune $LUNE"
 
           BIN="$RUNNER_TEMP/bin"
           mkdir -p "$BIN"
@@ -41,6 +42,7 @@ jobs:
           get "https://github.com/Kampfkarren/selene/releases/download/$SELENE/selene-$SELENE-linux.zip"
           get "https://github.com/JohnnyMorganz/StyLua/releases/download/v$STYLUA/stylua-linux-x86_64.zip"
           get "https://github.com/JohnnyMorganz/luau-lsp/releases/download/$LUAU_LSP/luau-lsp-linux-x86_64.zip"
+          get "https://github.com/lune-org/lune/releases/download/v$LUNE/lune-$LUNE-linux-x86_64.zip"
           chmod +x "$BIN"/*
           echo "$BIN" >> "$GITHUB_PATH"
 
@@ -58,6 +60,10 @@ jobs:
       - name: Проверка сцены
         if: ${{ !cancelled() && steps.build.outcome == 'success' }}
         run: python3 tools/check_scene.py "$RUNNER_TEMP/ro1.rbxlx"
+
+      - name: Автотесты (симулятор сервера)
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        run: lune run tests/run.luau "$RUNNER_TEMP/ro1.rbxlx"
 
       # Готовый файл места: Actions → запуск → Artifacts → ro1-place.
       - name: Файл места для Studio
@@ -78,7 +84,7 @@ jobs:
 
       - name: Форматирование (StyLua)
         if: ${{ !cancelled() }}
-        run: stylua --check src
+        run: stylua --check src tests
 
       - name: Линтер (selene)
         if: ${{ !cancelled() }}
