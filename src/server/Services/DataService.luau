@@ -514,13 +514,30 @@ end
 -- Жизненный цикл
 --------------------------------------------------------------------------------
 
+local function useMemoryStore(reason: string)
+	warn(
+		`[DataService] Сохранения работают в памяти ({reason}): прогресс пропадёт после остановки игры. `
+			.. "Для настоящих сохранений опубликуйте место (File → Publish to Roblox) и включите "
+			.. "Game Settings → Security → Enable Studio Access to API Services."
+	)
+	updateAsync = createMemoryStore()
+end
+
 function DataService:Init()
+	-- PlaceId = 0 только у неопубликованного места (файл, открытый в Studio).
+	-- DataStore там недоступен в принципе, поэтому даже не обращаемся к нему:
+	-- иначе Roblox выводит ошибку «You must publish this place...».
+	if game.PlaceId == 0 then
+		useMemoryStore("место не опубликовано")
+		return
+	end
+
 	local ok, store = pcall(function()
 		return DataStoreService:GetDataStore(STORE_NAME)
 	end)
 	local usable = ok
 	if usable and RunService:IsStudio() then
-		-- В Studio проверяем доступ к API заранее, иначе каждая загрузка будет падать.
+		-- Опубликованное место в Studio: доступ к API может быть выключен в настройках.
 		usable = pcall(function()
 			local dataStore = store :: DataStore
 			dataStore:GetAsync("__studio_probe")
@@ -533,12 +550,7 @@ function DataService:Init()
 			return dataStore:UpdateAsync(key, transform :: any)
 		end
 	elseif RunService:IsStudio() then
-		warn(
-			"[DataService] Нет доступа к DataStore — данные хранятся в памяти и пропадут после остановки.\n"
-				.. "Чтобы проверить настоящие сохранения: опубликуйте место и включите "
-				.. "Game Settings → Security → Enable Studio Access to API Services."
-		)
-		updateAsync = createMemoryStore()
+		useMemoryStore("в Studio выключен доступ к API")
 	else
 		-- Живой сервер без DataStore: игроки будут кикнуты с просьбой перезайти,
 		-- но никто не начнёт с пустыми данными.
