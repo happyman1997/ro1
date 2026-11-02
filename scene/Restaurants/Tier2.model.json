@@ -880,6 +880,138 @@
           ]
         }
       ]
+    },
+    {
+      "Name": "DefenseSlots",
+      "ClassName": "Folder",
+      "Children": [
+        {
+          "Name": "Slot_Door1",
+          "ClassName": "Part",
+          "Properties": {
+            "Anchored": true,
+            "Size": [
+              1,
+              0.2,
+              1
+            ],
+            "CFrame": {
+              "CFrame": {
+                "position": [
+                  8,
+                  0.4,
+                  5.5
+                ],
+                "orientation": [
+                  [
+                    -1,
+                    0,
+                    0
+                  ],
+                  [
+                    0,
+                    1,
+                    0
+                  ],
+                  [
+                    0,
+                    0,
+                    -1
+                  ]
+                ]
+              }
+            },
+            "Color": [
+              0.2,
+              0.8,
+              1
+            ],
+            "Material": "SmoothPlastic",
+            "TopSurface": "Smooth",
+            "BottomSurface": "Smooth",
+            "Transparency": 1,
+            "Tags": [
+              "DefenseSlot"
+            ],
+            "CanCollide": false,
+            "CanQuery": false,
+            "CanTouch": false,
+            "Attributes": {
+              "Attributes": {
+                "SlotId": {
+                  "String": "Door1"
+                },
+                "SlotKind": {
+                  "String": "Guard"
+                }
+              }
+            }
+          }
+        },
+        {
+          "Name": "Slot_Hall1",
+          "ClassName": "Part",
+          "Properties": {
+            "Anchored": true,
+            "Size": [
+              1,
+              0.2,
+              1
+            ],
+            "CFrame": {
+              "CFrame": {
+                "position": [
+                  0,
+                  0.4,
+                  -4
+                ],
+                "orientation": [
+                  [
+                    -1,
+                    0,
+                    0
+                  ],
+                  [
+                    0,
+                    1,
+                    0
+                  ],
+                  [
+                    0,
+                    0,
+                    -1
+                  ]
+                ]
+              }
+            },
+            "Color": [
+              0.2,
+              0.8,
+              1
+            ],
+            "Material": "SmoothPlastic",
+            "TopSurface": "Smooth",
+            "BottomSurface": "Smooth",
+            "Transparency": 1,
+            "Tags": [
+              "DefenseSlot"
+            ],
+            "CanCollide": false,
+            "CanQuery": false,
+            "CanTouch": false,
+            "Attributes": {
+              "Attributes": {
+                "SlotId": {
+                  "String": "Hall1"
+                },
+                "SlotKind": {
+                  "String": "Guard"
+                }
+              }
+            }
+          }
+        }
+      ]
     }
   ]
 }

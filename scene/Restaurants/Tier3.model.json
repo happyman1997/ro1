@@ -957,104 +957,201 @@
               }
             }
           ]
-        },
+        }
+      ]
+    },
+    {
+      "Name": "DefenseSlots",
+      "ClassName": "Folder",
+      "Children": [
         {
-          "Name": "CeilingTurret1",
-          "ClassName": "Model",
+          "Name": "Slot_Door1",
+          "ClassName": "Part",
           "Properties": {
-            "Tags": [
-              "Turret"
+            "Anchored": true,
+            "Size": [
+              1,
+              0.2,
+              1
             ],
+            "CFrame": {
+              "CFrame": {
+                "position": [
+                  11,
+                  0.4,
+                  7.5
+                ],
+                "orientation": [
+                  [
+                    -1,
+                    0,
+                    0
+                  ],
+                  [
+                    0,
+                    1,
+                    0
+                  ],
+                  [
+                    0,
+                    0,
+                    -1
+                  ]
+                ]
+              }
+            },
+            "Color": [
+              0.2,
+              0.8,
+              1
+            ],
+            "Material": "SmoothPlastic",
+            "TopSurface": "Smooth",
+            "BottomSurface": "Smooth",
+            "Transparency": 1,
+            "Tags": [
+              "DefenseSlot"
+            ],
+            "CanCollide": false,
+            "CanQuery": false,
+            "CanTouch": false,
             "Attributes": {
               "Attributes": {
-                "DefenderType": {
-                  "String": "CeilingTurret"
+                "SlotId": {
+                  "String": "Door1"
+                },
+                "SlotKind": {
+                  "String": "Guard"
                 }
               }
             }
-          },
-          "Children": [
-            {
-              "Name": "Head",
-              "ClassName": "Part",
-              "Properties": {
-                "Anchored": true,
-                "Size": [
-                  1.6,
-                  1,
-                  1.6
+          }
+        },
+        {
+          "Name": "Slot_Hall1",
+          "ClassName": "Part",
+          "Properties": {
+            "Anchored": true,
+            "Size": [
+              1,
+              0.2,
+              1
+            ],
+            "CFrame": {
+              "CFrame": {
+                "position": [
+                  0,
+                  0.4,
+                  -5
                 ],
-                "CFrame": {
-                  "CFrame": {
-                    "position": [
-                      0,
-                      11.6,
-                      -2
-                    ],
-                    "orientation": [
-                      [
-                        1,
-                        0,
-                        0
-                      ],
-                      [
-                        0,
-                        1,
-                        0
-                      ],
-                      [
-                        0,
-                        0,
-                        1
-                      ]
-                    ]
-                  }
+                "orientation": [
+                  [
+                    -1,
+                    0,
+                    0
+                  ],
+                  [
+                    0,
+                    1,
+                    0
+                  ],
+                  [
+                    0,
+                    0,
+                    -1
+                  ]
+                ]
+              }
+            },
+            "Color": [
+              0.2,
+              0.8,
+              1
+            ],
+            "Material": "SmoothPlastic",
+            "TopSurface": "Smooth",
+            "BottomSurface": "Smooth",
+            "Transparency": 1,
+            "Tags": [
+              "DefenseSlot"
+            ],
+            "CanCollide": false,
+            "CanQuery": false,
+            "CanTouch": false,
+            "Attributes": {
+              "Attributes": {
+                "SlotId": {
+                  "String": "Hall1"
                 },
-                "Color": [
-                  0.1,
-                  0.1,
-                  0.1
-                ],
-                "Material": "Metal",
-                "TopSurface": "Smooth",
-                "BottomSurface": "Smooth"
-              },
-              "Children": [
-                {
-                  "Name": "Muzzle",
-                  "ClassName": "Attachment",
-                  "Properties": {
-                    "CFrame": {
-                      "CFrame": {
-                        "position": [
-                          0,
-                          0,
-                          -1
-                        ],
-                        "orientation": [
-                          [
-                            1,
-                            0,
-                            0
-                          ],
-                          [
-                            0,
-                            1,
-                            0
-                          ],
-                          [
-                            0,
-                            0,
-                            1
-                          ]
-                        ]
-                      }
-                    }
-                  }
+                "SlotKind": {
+                  "String": "Guard"
                 }
-              ]
+              }
             }
-          ]
+          }
+        },
+        {
+          "Name": "Slot_Ceiling1",
+          "ClassName": "Part",
+          "Properties": {
+            "Anchored": true,
+            "Size": [
+              1,
+              0.2,
+              1
+            ],
+            "CFrame": {
+              "CFrame": {
+                "position": [
+                  0,
+                  11.6,
+                  -2
+                ],
+                "orientation": [
+                  [
+                    -1,
+                    0,
+                    0
+                  ],
+                  [
+                    0,
+                    1,
+                    0
+                  ],
+                  [
+                    0,
+                    0,
+                    -1
+                  ]
+                ]
+              }
+            },
+            "Color": [
+              0.2,
+              0.8,
+              1
+            ],
+            "Material": "SmoothPlastic",
+            "TopSurface": "Smooth",
+            "BottomSurface": "Smooth",
+            "Transparency": 1,
+            "Tags": [
+              "DefenseSlot"
+            ],
+            "CanCollide": false,
+            "CanQuery": false,
+            "CanTouch": false,
+            "Attributes": {
+              "Attributes": {
+                "SlotId": {
+                  "String": "Ceiling1"
+                },
+                "SlotKind": {
+                  "String": "Turret"
+                }
+              }
+            }
+          }
         }
       ]
     }

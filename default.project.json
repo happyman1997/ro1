@@ -18,6 +18,9 @@
       },
       "Weapons": {
         "$path": "scene/Weapons"
+      },
+      "Defenders": {
+        "$path": "scene/Defenders"
       }
     },
     "StarterPlayer": {

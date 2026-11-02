@@ -22,11 +22,14 @@ local function maxHealth(world, player): number
 	return world:humanoid(player).MaxHealth
 end
 
+-- Улучшить до Tier 3 и нанять потолочную турель в слот Ceiling1.
 local function upgradeToTier3(world, owner)
-	world:chat(owner, "/cash 36000")
+	world:chat(owner, "/cash 46000")
 	world:chat(owner, "/upgrade")
 	world:chat(owner, "/upgrade")
 	assert(world:plot(1):GetAttribute("Tier") == 3, "не удалось улучшить до Tier 3")
+	world:chat(owner, "/hire Ceiling1 CeilingTurret")
+	assert(world:plot(1).Defense:FindFirstChild("CeilingTurret_Ceiling1"), "турель не нанята")
 end
 
 return function(test)

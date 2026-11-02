@@ -48,6 +48,10 @@ local Remotes: { [string]: RemoteInfo } = {
 	RepairRestaurant = { direction = "ToServer", kind = "Reliable" },
 	-- Выстрел из оружия в руках: (направление прицела: Vector3). Всё остальное считает сервер.
 	Fire = { direction = "ToServer", kind = "Reliable" },
+	-- Нанять охрану в слот своего ресторана: (slotId, defenderType).
+	HireDefender = { direction = "ToServer", kind = "Reliable" },
+	-- Уволить охрану из слота: (slotId).
+	DismissDefender = { direction = "ToServer", kind = "Reliable" },
 }
 
 for _, info in Remotes do
