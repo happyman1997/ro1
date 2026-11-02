@@ -54,6 +54,7 @@ local CombatService = require(script.Parent.CombatService)
 local DataService = require(script.Parent.DataService)
 local GuardAIService = require(script.Parent.GuardAIService)
 local NetService = require(script.Parent.NetService)
+local PartyService = require(script.Parent.PartyService)
 local PlotService = require(script.Parent.PlotService)
 
 local TEMPLATES_FOLDER = "Weapons"
@@ -128,8 +129,8 @@ local function applyHit(shooter: Player, info: WeaponInfo, part: BasePart)
 	local model = part:FindFirstAncestorOfClass("Model")
 	local victim = if model then Players:GetPlayerFromCharacter(model) else nil
 	if victim then
-		if victim == shooter or model == nil then
-			return
+		if model == nil or PartyService:areAllies(shooter, victim) then
+			return -- себя и союзников не раним
 		end
 		local humanoid = model:FindFirstChildOfClass("Humanoid")
 		if CombatService:damagePlayer(victim, info.Damage, shooter) > 0 and humanoid then

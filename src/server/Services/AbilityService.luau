@@ -26,6 +26,7 @@ local ClassService = require(script.Parent.ClassService)
 local CombatService = require(script.Parent.CombatService)
 local GuardAIService = require(script.Parent.GuardAIService)
 local NetService = require(script.Parent.NetService)
+local PartyService = require(script.Parent.PartyService)
 local PlotService = require(script.Parent.PlotService)
 
 local DEFENDER_TAGS = { "Guard", "Turret" }
@@ -71,7 +72,10 @@ local function explode(attacker: Player, info: AbilityInfo, center: Vector3)
 
 	local damage = info.PlayerDamage :: number
 	for victim in victims do
-		if victim ~= attacker and CombatService:damagePlayer(victim, damage, attacker) > 0 then
+		if
+			not PartyService:areAllies(attacker, victim)
+			and CombatService:damagePlayer(victim, damage, attacker) > 0
+		then
 			local plot = PlotService:getPlot(victim)
 			local _, _, root = CharacterUtil.getAlive(victim)
 			if plot and root and PlotService:isInTerritory(plot, root.Position) then

@@ -288,8 +288,8 @@ local function onHackRequest(plot: Plot, player: Player)
 		)
 		return
 	end
-	if PlotService:isOwner(plot, player) then
-		return
+	if PlotService:isFriendly(plot, player) then
+		return -- свою кассу и кассу союзника не взламывают
 	end
 	if not ClassService:canHack(player) then
 		NetService:flag(player, "взлом кассы не разведчиком", NetService.Penalty.RateLimit)

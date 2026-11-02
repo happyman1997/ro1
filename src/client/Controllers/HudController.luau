@@ -4,8 +4,9 @@
 
 	• Сверху слева: деньги, уровень ресторана, состояние («работает» / «стоит»).
 	• Снизу: «Улучшить», «Починить» (только когда ресторан стоит), «Охрана»,
-	  «Магазин», «Класс».
-	• Панели: охрана (наём и увольнение по слотам), магазин оружия, выбор класса.
+	  «Магазин», «Класс», «Группа».
+	• Панели: охрана (наём и увольнение по слотам), магазин оружия, выбор класса,
+	  группа (приглашения, состав, выход).
 
 	Интерфейс только отправляет просьбы серверу (Net.fire) и показывает данные
 	из StateController и атрибутов своего участка. Цены и доступность здесь —
@@ -21,10 +22,12 @@ local Config = Shared:WaitForChild("Config")
 local Abilities = require(Config:WaitForChild("Abilities"))
 local Classes = require(Config:WaitForChild("Classes"))
 local Defense = require(Config:WaitForChild("Defense"))
+local PartyConfig = require(Config:WaitForChild("Party"))
 local Tiers = require(Config:WaitForChild("Tiers"))
 local Weapons = require(Config:WaitForChild("Weapons"))
 local Net = require(script.Parent.Parent:WaitForChild("Modules"):WaitForChild("Net"))
 local AbilityController = require(script.Parent:WaitForChild("AbilityController"))
+local PartyController = require(script.Parent:WaitForChild("PartyController"))
 local StateController = require(script.Parent:WaitForChild("StateController"))
 
 local localPlayer = Players.LocalPlayer
@@ -240,6 +243,9 @@ local function refreshHeader()
 	if info then
 		buttons.RepairButton.Text = `Починить — {formatMoney(info.RepairCost)}`
 	end
+	local inviteCount = #PartyController:getInvites()
+	buttons.PartyTab.Text = if inviteCount > 0 then `Группа ({inviteCount})` else "Группа"
+	buttons.PartyTab.BackgroundColor3 = if inviteCount > 0 then COLORS.good else COLORS.button
 end
 
 panelBuilders.DefensePanel = function(list: Instance)
@@ -343,6 +349,73 @@ panelBuilders.ClassPanel = function(list: Instance)
 		rowButton(row, `Class_{classId}`, if classId == current then "Выбран" else "Выбрать", 1, function()
 			Net.fire("SelectClass", classId)
 		end)
+	end
+end
+
+panelBuilders.PartyPanel = function(list: Instance)
+	local order = 0
+	local function nextOrder(): number
+		order += 1
+		return order
+	end
+
+	for _, invite in PartyController:getInvites() do
+		local row =
+			makeRow(list, `Invite_{invite.userId}`, `{invite.name} зовёт вас в группу`, nextOrder())
+		rowButton(row, `Accept_{invite.userId}`, "Принять", 1, function()
+			PartyController:respond(invite.userId, true)
+		end)
+		rowButton(row, `Decline_{invite.userId}`, "Отклонить", 2, function()
+			PartyController:respond(invite.userId, false)
+		end)
+	end
+
+	local members = PartyController:getMembers()
+	if #members > 0 then
+		local names = {}
+		for _, userId in members do
+			local member = Players:GetPlayerByUserId(userId)
+			local name = if member then member.DisplayName else tostring(userId)
+			table.insert(names, if userId == localPlayer.UserId then `{name} (вы)` else name)
+		end
+		local row = makeRow(
+			list,
+			"Members",
+			`Группа {#members}/{PartyConfig.MaxSize}: {table.concat(names, ", ")}`,
+			nextOrder()
+		)
+		rowButton(row, "LeavePartyButton", "Выйти из группы", 1, function()
+			PartyController:leave()
+		end)
+	end
+
+	local full = #members >= PartyConfig.MaxSize
+	local others = Players:GetPlayers()
+	table.sort(others, function(a, b)
+		return a.DisplayName < b.DisplayName
+	end)
+	local any = false
+	for _, other in others do
+		if other == localPlayer or PartyController:isAlly(other.UserId) then
+			continue
+		end
+		any = true
+		local row = makeRow(list, `Player_{other.UserId}`, other.DisplayName, nextOrder())
+		local userId = other.UserId
+		rowButton(
+			row,
+			`Invite_{userId}`,
+			if full then "Группа полная" else "Пригласить",
+			1,
+			function()
+				if not full then
+					PartyController:invite(userId)
+				end
+			end
+		)
+	end
+	if not any and #members == 0 then
+		makeRow(list, "Empty", "На сервере больше никого нет", nextOrder())
 	end
 end
 
@@ -455,13 +528,19 @@ local function build()
 	buttons.ClassTab = makeButton("ClassTab", "Класс", bar, function()
 		togglePanel("ClassPanel")
 	end)
-	for order, name in { "UpgradeButton", "RepairButton", "AbilityButton", "DefenseTab", "ShopTab", "ClassTab" } do
+	buttons.PartyTab = makeButton("PartyTab", "Группа", bar, function()
+		togglePanel("PartyPanel")
+	end)
+	for order, name in
+		{ "UpgradeButton", "RepairButton", "AbilityButton", "DefenseTab", "ShopTab", "ClassTab", "PartyTab" }
+	do
 		buttons[name].LayoutOrder = order
 	end
 
 	makePanel("DefensePanel", "Охрана ресторана")
 	makePanel("ShopPanel", "Магазин оружия")
 	makePanel("ClassPanel", "Класс")
+	makePanel("PartyPanel", "Группа")
 end
 
 -- Следим за атрибутами своего участка (владелец, уровень, «работает»).
@@ -482,6 +561,7 @@ function HudController:Start()
 	build()
 	StateController.Loaded:Connect(refreshAll)
 	StateController.Changed:Connect(refreshAll)
+	PartyController.Changed:Connect(refreshAll)
 	watchPlots()
 	refreshAll()
 end
