@@ -525,6 +525,22 @@ local GETTERS = {
 }
 
 local SETTERS = {
+	Humanoid = {
+		-- Здоровье упало до нуля — событие Died (один раз, как в Roblox).
+		Health = function(world, self, value)
+			local st = world.state[self]
+			local old = st.props.Health
+			if old == nil then
+				old = PROPS.Humanoid.Health
+			end
+			local maxHealth = st.props.MaxHealth or PROPS.Humanoid.MaxHealth
+			local new = math.clamp(value, 0, maxHealth)
+			st.props.Health = new
+			if old > 0 and new <= 0 then
+				world:_event(self, "Died"):_fire()
+			end
+		end,
+	},
 	BasePart = {
 		Position = function(_world, self, value)
 			local cf = self.CFrame

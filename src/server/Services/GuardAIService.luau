@@ -52,6 +52,7 @@ local Defense = require(ReplicatedStorage.Shared.Config.Defense)
 local LineOfSight = require(script.Parent.Parent.Modules.LineOfSight)
 local NpcUtil = require(script.Parent.Parent.Modules.NpcUtil)
 local ClassService = require(script.Parent.ClassService)
+local CombatService = require(script.Parent.CombatService)
 local NetService = require(script.Parent.NetService)
 local PlotService = require(script.Parent.PlotService)
 
@@ -315,6 +316,7 @@ local function meleeAttack(defender: Defender, target: Candidate, now: number)
 	if (targetPosition - root.Position).Magnitude <= MELEE_REACH then
 		if now >= defender.nextAttackAt then
 			defender.nextAttackAt = now + defender.info.FireInterval
+			CombatService:recordDamage(target.player, nil)
 			target.humanoid:TakeDamage(defender.info.Damage)
 		end
 	elseif (targetPosition - defender.post).Magnitude <= defender.info.LeashRadius then
@@ -336,6 +338,7 @@ local function rangedAttack(defender: Defender, target: Candidate, now: number)
 	defender.nextAttackAt = now + defender.info.FireInterval
 
 	if random:NextNumber() <= defender.info.Accuracy then
+		CombatService:recordDamage(target.player, nil)
 		target.humanoid:TakeDamage(defender.info.Damage)
 	else
 		impact += random:NextUnitVector() * MISS_SPREAD
