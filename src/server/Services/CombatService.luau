@@ -47,6 +47,7 @@ type Drop = { amount: number, part: BasePart }
 local CombatService = {}
 
 local lastDamage: { [Player]: DamageRecord } = {}
+local reductions: { [Player]: { fraction: number, untilTime: number } } = {}
 local drops: { [BasePart]: Drop } = {}
 local pickupLimiter = RateLimiter.new(3, 5)
 local dropsFolder: Folder? = nil
@@ -147,6 +148,26 @@ function CombatService:recordDamage(victim: Player, attacker: Player?)
 	lastDamage[victim] = { attacker = attacker, time = os.clock(), position = position }
 end
 
+-- Снизить входящий урон по игроку на долю fraction на duration секунд (щит Танка).
+function CombatService:addDamageReduction(player: Player, fraction: number, duration: number)
+	reductions[player] = { fraction = math.clamp(fraction, 0, 0.95), untilTime = os.clock() + duration }
+end
+
+-- Единственная точка урона по игроку: учитывает снижение урона и запоминает нападавшего.
+-- attacker = nil — урон от охраны. Возвращает нанесённый урон.
+function CombatService:damagePlayer(victim: Player, amount: number, attacker: Player?): number
+	local _, humanoid = CharacterUtil.getAlive(victim)
+	if humanoid == nil or amount <= 0 then
+		return 0
+	end
+	local reduction = reductions[victim]
+	local factor = if reduction and reduction.untilTime > os.clock() then 1 - reduction.fraction else 1
+	local dealt = amount * factor
+	CombatService:recordDamage(victim, attacker) -- до урона: смертельный урон сразу вызывает Died
+	humanoid:TakeDamage(dealt)
+	return dealt
+end
+
 function CombatService:isInCombat(player: Player): boolean
 	local record = lastDamage[player]
 	return record ~= nil and os.clock() - record.time < COMBAT_LOG_WINDOW
@@ -204,6 +225,7 @@ function CombatService:Start()
 
 	Players.PlayerRemoving:Connect(function(player: Player)
 		pickupLimiter:remove(player)
+		reductions[player] = nil
 		local record = lastDamage[player]
 		lastDamage[player] = nil
 		-- Данные ещё доступны: DataService сохраняет их после всех обработчиков выхода.

@@ -18,11 +18,13 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = Shared:WaitForChild("Config")
+local Abilities = require(Config:WaitForChild("Abilities"))
 local Classes = require(Config:WaitForChild("Classes"))
 local Defense = require(Config:WaitForChild("Defense"))
 local Tiers = require(Config:WaitForChild("Tiers"))
 local Weapons = require(Config:WaitForChild("Weapons"))
 local Net = require(script.Parent.Parent:WaitForChild("Modules"):WaitForChild("Net"))
+local AbilityController = require(script.Parent:WaitForChild("AbilityController"))
 local StateController = require(script.Parent:WaitForChild("StateController"))
 
 local localPlayer = Players.LocalPlayer
@@ -232,6 +234,9 @@ local function refreshHeader()
 		then `Улучшить — {formatMoney(nextInfo.UpgradeCost)}`
 		else "Максимальный уровень"
 	buttons.RepairButton.Visible = not operational
+	local class = Classes[StateController:get("Class") or "Assault"]
+	local ability = if class then Abilities[class.Ability] else nil
+	buttons.AbilityButton.Text = if ability then `{ability.Name} (Q)` else "Способность (Q)"
 	if info then
 		buttons.RepairButton.Text = `Починить — {formatMoney(info.RepairCost)}`
 	end
@@ -436,6 +441,11 @@ local function build()
 	end)
 	buttons.RepairButton.BackgroundColor3 = COLORS.bad
 	buttons.RepairButton.Visible = false
+	buttons.AbilityButton = makeButton("AbilityButton", "Способность (Q)", bar, function()
+		AbilityController:use()
+	end)
+	buttons.AbilityButton.BackgroundColor3 = COLORS.accent
+	buttons.AbilityButton.TextColor3 = COLORS.panel
 	buttons.DefenseTab = makeButton("DefenseTab", "Охрана", bar, function()
 		togglePanel("DefensePanel")
 	end)
@@ -445,7 +455,7 @@ local function build()
 	buttons.ClassTab = makeButton("ClassTab", "Класс", bar, function()
 		togglePanel("ClassPanel")
 	end)
-	for order, name in { "UpgradeButton", "RepairButton", "DefenseTab", "ShopTab", "ClassTab" } do
+	for order, name in { "UpgradeButton", "RepairButton", "AbilityButton", "DefenseTab", "ShopTab", "ClassTab" } do
 		buttons[name].LayoutOrder = order
 	end
 

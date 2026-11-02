@@ -35,7 +35,30 @@ function EffectsController:drawTracer(origin: Vector3, impact: Vector3)
 	Debris:AddItem(tracer, TRACER_LIFETIME)
 end
 
+-- Вспышка взрыва: шар, который быстро исчезает.
+function EffectsController:drawExplosion(center: Vector3, radius: number)
+	local flash = Instance.new("Part")
+	flash.Shape = Enum.PartType.Ball
+	flash.Anchored = true
+	flash.CanCollide = false
+	flash.CanQuery = false
+	flash.CanTouch = false
+	flash.CastShadow = false
+	flash.Material = Enum.Material.Neon
+	flash.Color = Color3.fromRGB(255, 140, 40)
+	flash.Transparency = 0.35
+	flash.Size = Vector3.new(radius * 2, radius * 2, radius * 2)
+	flash.CFrame = CFrame.new(center)
+	flash.Parent = workspace
+	Debris:AddItem(flash, 0.25)
+end
+
 function EffectsController:Start()
+	Net.on("ExplosionFx", function(center: unknown, radius: unknown)
+		if typeof(center) == "Vector3" and typeof(radius) == "number" then
+			EffectsController:drawExplosion(center, radius)
+		end
+	end)
 	Net.on("ShotFired", function(origin: unknown, impact: unknown)
 		if typeof(origin) == "Vector3" and typeof(impact) == "Vector3" then
 			EffectsController:drawTracer(origin, impact)
