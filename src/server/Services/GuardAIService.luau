@@ -306,6 +306,33 @@ local function faceTarget(defender: Defender, position: Vector3)
 	end
 end
 
+-- Шаг к точке goal. Заякоренный NPC двигается кинематически (переносом модели):
+-- так поведение одинаково на сервере Roblox и в симуляторе и не зависит от физики.
+-- Незаякоренный — обычным Humanoid:MoveTo.
+local function stepTowards(defender: Defender, goal: Vector3)
+	local root = defender.root
+	local humanoid = defender.humanoid
+	if root == nil then
+		return
+	end
+	if not root.Anchored then
+		if humanoid then
+			humanoid:MoveTo(goal)
+		end
+		return
+	end
+	local offset = Vector3.new(goal.X - root.Position.X, 0, goal.Z - root.Position.Z)
+	local distance = offset.Magnitude
+	if distance < 0.05 then
+		return
+	end
+	local speed = if humanoid then humanoid.WalkSpeed else 16
+	local direction = offset / distance
+	local pivot = defender.model:GetPivot()
+	local position = pivot.Position + direction * math.min(distance, speed * SCAN_INTERVAL)
+	defender.model:PivotTo(CFrame.lookAt(position, position + direction))
+end
+
 local function meleeAttack(defender: Defender, target: Candidate, now: number)
 	local humanoid = defender.humanoid
 	local root = defender.root
@@ -320,9 +347,9 @@ local function meleeAttack(defender: Defender, target: Candidate, now: number)
 			target.humanoid:TakeDamage(defender.info.Damage)
 		end
 	elseif (targetPosition - defender.post).Magnitude <= defender.info.LeashRadius then
-		humanoid:MoveTo(targetPosition)
+		stepTowards(defender, targetPosition)
 	else
-		humanoid:MoveTo(defender.post) -- цель за поводком: возвращаемся охранять
+		stepTowards(defender, defender.post) -- цель за поводком: возвращаемся охранять
 	end
 end
 
@@ -360,7 +387,7 @@ local function idle(defender: Defender)
 	local humanoid = defender.humanoid
 	local root = defender.root
 	if defender.info.Melee and humanoid and root and (root.Position - defender.post).Magnitude > 2 then
-		humanoid:MoveTo(defender.post)
+		stepTowards(defender, defender.post)
 	end
 end
 
