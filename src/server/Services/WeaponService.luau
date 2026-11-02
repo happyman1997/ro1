@@ -49,6 +49,7 @@ local Destruction = require(script.Parent.Parent.Modules.Destruction)
 local Guard = require(ReplicatedStorage.Shared.Guard)
 local Weapons = require(ReplicatedStorage.Shared.Config.Weapons)
 local AbilityService = require(script.Parent.AbilityService)
+local AimStatsService = require(script.Parent.AimStatsService)
 local ClassService = require(script.Parent.ClassService)
 local CombatService = require(script.Parent.CombatService)
 local CustomerService = require(script.Parent.CustomerService)
@@ -125,16 +126,18 @@ end
 -- Урон
 --------------------------------------------------------------------------------
 
-local function applyHit(shooter: Player, info: WeaponInfo, part: BasePart)
+-- Возвращает true, если пуля ранила врага-игрока (для статистики стрельбы).
+local function applyHit(shooter: Player, info: WeaponInfo, part: BasePart): boolean
 	-- Игрок
 	local model = part:FindFirstAncestorOfClass("Model")
 	local victim = if model then Players:GetPlayerFromCharacter(model) else nil
 	if victim then
 		if model == nil or PartyService:areAllies(shooter, victim) then
-			return -- себя и союзников не раним
+			return false -- себя и союзников не раним
 		end
 		local humanoid = model:FindFirstChildOfClass("Humanoid")
-		if CombatService:damagePlayer(victim, info.Damage, shooter) > 0 and humanoid then
+		local dealt = CombatService:damagePlayer(victim, info.Damage, shooter)
+		if dealt > 0 and humanoid then
 			-- Напал на хозяина у него на территории — охрана хозяина отвечает.
 			local plot = PlotService:getPlot(victim)
 			local root = humanoid.RootPart
@@ -142,17 +145,17 @@ local function applyHit(shooter: Player, info: WeaponInfo, part: BasePart)
 				reportAggression(plot, shooter)
 			end
 		end
-		return
+		return dealt > 0
 	end
 
 	local plot = PlotService:getPlotFromInstance(part)
 	if plot and PlotService:isFriendly(plot, shooter) then
-		return -- свой ресторан и своя охрана не повреждаются
+		return false -- свой ресторан и своя охрана не повреждаются
 	end
 
 	-- NPC-клиент: падает, но это ничего не даёт — ни денег, ни тревоги
 	if CustomerService:hit(part) then
-		return
+		return false
 	end
 	local class = ClassService:getClass(shooter)
 
@@ -164,7 +167,7 @@ local function applyHit(shooter: Player, info: WeaponInfo, part: BasePart)
 			defender:SetAttribute("SuppressedUntil", workspace:GetServerTimeNow() + SUPPRESS_EFFECT)
 		end
 		reportAggression(plot, shooter)
-		return
+		return false
 	end
 
 	-- Персонал
@@ -172,7 +175,7 @@ local function applyHit(shooter: Player, info: WeaponInfo, part: BasePart)
 	if staff then
 		Destruction.damageDefender(staff, info.Damage)
 		reportAggression(plot, shooter)
-		return
+		return false
 	end
 
 	-- Мебель, стены, стекло
@@ -180,34 +183,39 @@ local function applyHit(shooter: Player, info: WeaponInfo, part: BasePart)
 	if target and Destruction.damage(target, info.StructureDamage * class.StructureDamage, false) then
 		reportAggression(plot, shooter)
 	end
+	return false
 end
 
--- Пустить пулю. Возвращает точку, где она остановилась (для трассера).
+-- Пустить пулю. Возвращает точку, где она остановилась (для трассера), и
+-- расстояние до первого раненого врага-игрока (nil — никого не ранила).
 local function traceShot(
 	shooter: Player,
 	character: Model,
 	info: WeaponInfo,
 	origin: Vector3,
 	direction: Vector3
-): Vector3
+): (Vector3, number?)
 	local params = RaycastParams.new()
 	params.FilterType = Enum.RaycastFilterType.Exclude
 	params.FilterDescendantsInstances = { character }
 
+	local hitDistance: number? = nil
 	for _ = 1, MAX_PASSES do
 		local result = workspace:Raycast(origin, direction, params)
 		if result == nil then
-			return origin + direction
+			return origin + direction, hitDistance
 		end
 		local hit = result.Instance
-		applyHit(shooter, info, hit)
+		if applyHit(shooter, info, hit) and hitDistance == nil then
+			hitDistance = (result.Position - origin).Magnitude
+		end
 		if hit:GetAttribute("ShootThrough") == true then
 			params:AddToFilter(hit) -- пуля прошла насквозь и летит дальше
 		else
-			return result.Position
+			return result.Position, hitDistance
 		end
 	end
-	return origin + direction
+	return origin + direction, hitDistance
 end
 
 local function onFire(player: Player, aim: Vector3)
@@ -246,7 +254,8 @@ local function onFire(player: Player, aim: Vector3)
 	local head = character:FindFirstChild("Head")
 	local origin = if head and head:IsA("BasePart") then (head :: BasePart).Position else root.Position
 	local direction = applySpread(aim.Unit, info.Spread) * info.Range
-	local impact = traceShot(player, character, info, origin, direction)
+	local impact, hitDistance = traceShot(player, character, info, origin, direction)
+	AimStatsService:record(player, aim.Unit, hitDistance)
 	NetService:fireNearby(origin, SHOT_EFFECT_RADIUS, player, "ShotFired", origin, impact)
 end
 

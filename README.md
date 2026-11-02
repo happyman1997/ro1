@@ -87,6 +87,7 @@ src/server  → ServerScriptService.Server        (клиенту не видн�
     PartyService        — группы для рейдов: приглашения, союзники
     CustomerService     — NPC-клиенты у стойки (визуальный слой)
     LeaderboardService  — глобальные рейтинги (OrderedDataStore)
+    AimStatsService     — статистика стрельбы против аимбота
     LeaderstatsService  — таблица игроков (только витрина)
     SettingsService     — образец запроса клиент → сервер
     DevCommandsService  — чат-команды для тестов (только в Studio)
