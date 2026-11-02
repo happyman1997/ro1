@@ -24,6 +24,7 @@ local Guard = require(ReplicatedStorage.Shared.Guard)
 local Destruction = require(script.Parent.Parent.Modules.Destruction)
 local ClassService = require(script.Parent.ClassService)
 local CombatService = require(script.Parent.CombatService)
+local CustomerService = require(script.Parent.CustomerService)
 local GuardAIService = require(script.Parent.GuardAIService)
 local NetService = require(script.Parent.NetService)
 local PartyService = require(script.Parent.PartyService)
@@ -52,11 +53,14 @@ local function explode(attacker: Player, info: AbilityInfo, center: Vector3)
 	local victims: { [Player]: boolean } = {}
 	local defenders: { [Instance]: boolean } = {}
 	local structures: { [Instance]: boolean } = {}
+	local customers: { [BasePart]: boolean } = {}
 	for _, part in workspace:GetPartBoundsInRadius(center, radius) do
 		local model = part:FindFirstAncestorOfClass("Model")
 		local player = if model then Players:GetPlayerFromCharacter(model) else nil
 		if player then
 			victims[player] = true
+		elseif Destruction.findTaggedAncestor(part, { "Customer" }) then
+			customers[part] = true
 		else
 			local defender = Destruction.findTaggedAncestor(part, DEFENDER_TAGS)
 			if defender then
@@ -88,6 +92,13 @@ local function explode(attacker: Player, info: AbilityInfo, center: Vector3)
 		if not (plot and PlotService:isFriendly(plot, attacker)) then
 			Destruction.damageDefender(defender, damage)
 			reportAggression(plot, attacker)
+		end
+	end
+	for part in customers do
+		-- Клиенты: без тревоги и денег (визуальный слой), чужие только.
+		local plot = PlotService:getPlotFromInstance(part)
+		if not (plot and PlotService:isFriendly(plot, attacker)) then
+			CustomerService:hit(part)
 		end
 	end
 	for target in structures do

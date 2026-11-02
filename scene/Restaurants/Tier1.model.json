@@ -851,6 +851,277 @@
           ]
         }
       ]
+    },
+    {
+      "Name": "CustomerPoints",
+      "ClassName": "Folder",
+      "Children": [
+        {
+          "Name": "Spawn1",
+          "ClassName": "Part",
+          "Properties": {
+            "Anchored": true,
+            "Size": [
+              1,
+              0.2,
+              1
+            ],
+            "CFrame": {
+              "CFrame": {
+                "position": [
+                  -6.0,
+                  0.4,
+                  9.0
+                ],
+                "orientation": [
+                  [
+                    1,
+                    0,
+                    0
+                  ],
+                  [
+                    0,
+                    1,
+                    0
+                  ],
+                  [
+                    0,
+                    0,
+                    1
+                  ]
+                ]
+              }
+            },
+            "Color": [
+              0.3,
+              1,
+              0.4
+            ],
+            "Material": "SmoothPlastic",
+            "TopSurface": "Smooth",
+            "BottomSurface": "Smooth",
+            "Transparency": 1,
+            "Tags": [
+              "CustomerSpawn"
+            ],
+            "CanCollide": false,
+            "CanQuery": false,
+            "CanTouch": false
+          }
+        },
+        {
+          "Name": "Spawn2",
+          "ClassName": "Part",
+          "Properties": {
+            "Anchored": true,
+            "Size": [
+              1,
+              0.2,
+              1
+            ],
+            "CFrame": {
+              "CFrame": {
+                "position": [
+                  6.0,
+                  0.4,
+                  9.0
+                ],
+                "orientation": [
+                  [
+                    1,
+                    0,
+                    0
+                  ],
+                  [
+                    0,
+                    1,
+                    0
+                  ],
+                  [
+                    0,
+                    0,
+                    1
+                  ]
+                ]
+              }
+            },
+            "Color": [
+              0.3,
+              1,
+              0.4
+            ],
+            "Material": "SmoothPlastic",
+            "TopSurface": "Smooth",
+            "BottomSurface": "Smooth",
+            "Transparency": 1,
+            "Tags": [
+              "CustomerSpawn"
+            ],
+            "CanCollide": false,
+            "CanQuery": false,
+            "CanTouch": false
+          }
+        },
+        {
+          "Name": "Door",
+          "ClassName": "Part",
+          "Properties": {
+            "Anchored": true,
+            "Size": [
+              1,
+              0.2,
+              1
+            ],
+            "CFrame": {
+              "CFrame": {
+                "position": [
+                  0,
+                  0.4,
+                  6.5
+                ],
+                "orientation": [
+                  [
+                    1,
+                    0,
+                    0
+                  ],
+                  [
+                    0,
+                    1,
+                    0
+                  ],
+                  [
+                    0,
+                    0,
+                    1
+                  ]
+                ]
+              }
+            },
+            "Color": [
+              0.3,
+              1,
+              0.4
+            ],
+            "Material": "SmoothPlastic",
+            "TopSurface": "Smooth",
+            "BottomSurface": "Smooth",
+            "Transparency": 1,
+            "Tags": [
+              "CustomerDoor"
+            ],
+            "CanCollide": false,
+            "CanQuery": false,
+            "CanTouch": false
+          }
+        },
+        {
+          "Name": "Order1",
+          "ClassName": "Part",
+          "Properties": {
+            "Anchored": true,
+            "Size": [
+              1,
+              0.2,
+              1
+            ],
+            "CFrame": {
+              "CFrame": {
+                "position": [
+                  -2.15,
+                  0.4,
+                  5.6
+                ],
+                "orientation": [
+                  [
+                    1,
+                    0,
+                    0
+                  ],
+                  [
+                    0,
+                    1,
+                    0
+                  ],
+                  [
+                    0,
+                    0,
+                    1
+                  ]
+                ]
+              }
+            },
+            "Color": [
+              0.3,
+              1,
+              0.4
+            ],
+            "Material": "SmoothPlastic",
+            "TopSurface": "Smooth",
+            "BottomSurface": "Smooth",
+            "Transparency": 1,
+            "Tags": [
+              "CustomerOrder"
+            ],
+            "CanCollide": false,
+            "CanQuery": false,
+            "CanTouch": false
+          }
+        },
+        {
+          "Name": "Order2",
+          "ClassName": "Part",
+          "Properties": {
+            "Anchored": true,
+            "Size": [
+              1,
+              0.2,
+              1
+            ],
+            "CFrame": {
+              "CFrame": {
+                "position": [
+                  -0.15,
+                  0.4,
+                  5.6
+                ],
+                "orientation": [
+                  [
+                    1,
+                    0,
+                    0
+                  ],
+                  [
+                    0,
+                    1,
+                    0
+                  ],
+                  [
+                    0,
+                    0,
+                    1
+                  ]
+                ]
+              }
+            },
+            "Color": [
+              0.3,
+              1,
+              0.4
+            ],
+            "Material": "SmoothPlastic",
+            "TopSurface": "Smooth",
+            "BottomSurface": "Smooth",
+            "Transparency": 1,
+            "Tags": [
+              "CustomerOrder"
+            ],
+            "CanCollide": false,
+            "CanQuery": false,
+            "CanTouch": false
+          }
+        }
+      ]
     }
   ]
 }

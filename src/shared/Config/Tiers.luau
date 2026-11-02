@@ -15,6 +15,7 @@ export type TierInfo = {
 	RegisterCapacity: number, -- больше в кассу не помещается: стимул чаще забирать выручку
 	RepairCost: number, -- цена ремонта после штурма
 	HackDuration: number, -- секунд на взлом кассы стелсом
+	MaxCustomers: number, -- NPC-клиентов одновременно (визуальный слой, на доход не влияет)
 }
 
 local Tiers: { TierInfo } = {
@@ -26,6 +27,7 @@ local Tiers: { TierInfo } = {
 		RegisterCapacity = 1200,
 		RepairCost = 150,
 		HackDuration = 8,
+		MaxCustomers = 2,
 	},
 	{
 		Name = "Кирпичное кафе",
@@ -35,6 +37,7 @@ local Tiers: { TierInfo } = {
 		RegisterCapacity = 5000,
 		RepairCost = 600,
 		HackDuration = 12,
+		MaxCustomers = 3,
 	},
 	{
 		Name = "Современный ресторан",
@@ -44,6 +47,7 @@ local Tiers: { TierInfo } = {
 		RegisterCapacity = 15000,
 		RepairCost = 2500,
 		HackDuration = 16,
+		MaxCustomers = 4,
 	},
 	{
 		Name = "Укреплённый бункер",
@@ -53,6 +57,7 @@ local Tiers: { TierInfo } = {
 		RegisterCapacity = 45000,
 		RepairCost = 8000,
 		HackDuration = 20,
+		MaxCustomers = 4,
 	},
 }
 
