@@ -77,4 +77,25 @@ return function(test)
 			expect.equal(world:humanoid(target).Health, before - 15, "попадание")
 		end
 	)
+
+	test(
+		"разведчик не видит «Взломать» на кассе союзника по группе",
+		function(world, expect)
+			local player = world:addPlayer("Player", 1)
+			local friend = world:addPlayer("Friend", 2)
+			world:advance(0.5)
+			world:startClient(player)
+			world:chat(player, "/class Stealth")
+			local friendRegister = world:findTagged(world:plot(2):FindFirstChild("Restaurant"), "CashRegister")
+			local hack = world:findPrompt(friendRegister, "Hack")
+			expect.equal(hack.Enabled, true, "чужая касса: взлом виден")
+
+			world:fireServer(friend, "InviteToParty", player.UserId)
+			world:fireServer(player, "RespondPartyInvite", friend.UserId, true)
+			expect.equal(hack.Enabled, false, "касса союзника: взлома нет")
+
+			world:fireServer(player, "LeaveParty")
+			expect.equal(hack.Enabled, true, "вышел из группы — снова чужая касса")
+		end
+	)
 end

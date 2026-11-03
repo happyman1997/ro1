@@ -191,6 +191,8 @@ def plot(x):
                  extra={"CanCollide": False, "CanTouch": False, "CanQuery": False}),
             # Площадка показывает границы территории на земле.
             part("Pad", (60, 0.2, 60), (x, 0.1, 0), (0.55, 0.53, 0.5), "Concrete"),
+            # Не нейтральная: Roblox сам сюда не ставит (новичок не появится на чужом участке).
+            # К своему ресторану переносит PlotService — при входе и после каждой гибели.
             part("Spawn", (6, 1, 6), (x, 0.7, 25), (0.9, 0.8, 0.3), cls="SpawnLocation",
                  extra={"Neutral": False, "AllowTeamChangeOnTouch": False, "Duration": 3}),
         ],

@@ -1542,7 +1542,12 @@ function World:addPlayer(name: string, userId: number)
 end
 
 function World:spawnCharacter(player)
+	-- Как в Roblox: RespawnLocation учитывается, только если точка нейтральная
+	-- (Neutral = true) или совпадает по команде с игроком. Команд в симуляторе нет.
 	local respawn = player.RespawnLocation
+	if respawn and respawn.Neutral ~= true then
+		respawn = nil
+	end
 	local position
 	if respawn then
 		position = respawn.Position + Vector3.new(0, 3, 0)

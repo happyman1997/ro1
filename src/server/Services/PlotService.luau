@@ -65,6 +65,7 @@ PlotService.RestaurantRemoving = Signal.new() :: Signal.Signal<Plot, Model>
 local plots: { Plot } = {}
 local plotByModel: { [Instance]: Plot } = {}
 local plotByPlayer: { [Player]: Plot } = {}
+local spawnConnections: { [Player]: RBXScriptConnection } = {}
 local templates: Instance? = nil
 
 --------------------------------------------------------------------------------
@@ -164,6 +165,20 @@ local function buildRestaurant(plot: Plot, tier: number)
 	PlotService.RestaurantBuilt:Fire(plot, restaurant)
 end
 
+-- Поставить персонажа на точку появления своего участка.
+--
+-- Почему не Player.RespawnLocation: Roblox использует её, только если точка
+-- нейтральная (Neutral = true) или совпадает по команде с игроком. Точки
+-- участков специально НЕ нейтральные, иначе новичок мог бы появиться на чужом
+-- участке под турелями. Поэтому сам Roblox ставит персонажа в лобби, а сервер
+-- переносит его к своему ресторану — и при входе, и после каждой гибели.
+local function moveToPlotSpawn(player: Player, plot: Plot)
+	local spawn = plot.model:FindFirstChild("Spawn")
+	if spawn and spawn:IsA("BasePart") and player.Character then
+		MovementService:teleport(player, (spawn :: BasePart).CFrame + Vector3.new(0, 4, 0))
+	end
+end
+
 local function assign(player: Player, data: DataTemplate.PlayerData)
 	if plotByPlayer[player] then
 		return
@@ -198,14 +213,16 @@ local function assign(player: Player, data: DataTemplate.PlayerData)
 	local tier = math.clamp(math.floor(data.Restaurant.Tier), 1, #Tiers)
 	buildRestaurant(free, tier)
 
-	local spawn = free.model:FindFirstChild("Spawn")
-	if spawn and spawn:IsA("SpawnLocation") then
-		player.RespawnLocation = spawn
-		local character = player.Character
-		if character then
-			MovementService:teleport(player, spawn.CFrame + Vector3.new(0, 4, 0))
-		end
-	end
+	moveToPlotSpawn(player, free) -- персонаж уже есть (обычно, если данные грузились долго)
+	-- Каждый новый персонаж (первый, если данные загрузились раньше него, и после
+	-- гибели) — к своему ресторану. defer: Roblox сначала сам ставит персонажа на точку.
+	spawnConnections[player] = player.CharacterAdded:Connect(function()
+		task.defer(function()
+			if plotByPlayer[player] == free then
+				moveToPlotSpawn(player, free)
+			end
+		end)
+	end)
 
 	PlotService.PlotAssigned:Fire(player, free)
 end
@@ -216,6 +233,11 @@ local function release(player: Player)
 		return
 	end
 	plotByPlayer[player] = nil
+	local connection = spawnConnections[player]
+	if connection then
+		connection:Disconnect()
+		spawnConnections[player] = nil
+	end
 	-- Владельца снимаем первым: обработчики RestaurantRemoving по plot.owner == nil
 	-- понимают, что это уход игрока, а не перестройка.
 	plot.owner = nil

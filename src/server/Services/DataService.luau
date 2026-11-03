@@ -197,6 +197,12 @@ end
 -- Работа с DataStore
 --------------------------------------------------------------------------------
 
+-- Чьи это данные — для DataStore (запросы по GDPR). У тестовых игроков Studio
+-- UserId отрицательный, его DataStore не примет: тогда список пустой.
+local function ownerIds(userId: number): { number }
+	return if userId > 0 then { userId } else {}
+end
+
 -- Захватить запись игрока: поставить метку «занято этим сервером».
 local function acquire(player: Player, key: string): (Record?, AcquireProblem?)
 	for attempt = 1, LOAD_ATTEMPTS do
@@ -232,7 +238,7 @@ local function acquire(player: Player, key: string): (Record?, AcquireProblem?)
 
 			record.Lock = { ServerId = SERVER_ID, Time = os.time() }
 			acquired = record
-			return record, { player.UserId }
+			return record, ownerIds(player.UserId)
 		end)
 
 		if ok and acquired then
@@ -267,7 +273,7 @@ local function writeRecord(userId: number, key: string, data: any, release: bool
 				Data = data,
 				Lock = if release then nil else { ServerId = SERVER_ID, Time = os.time() },
 			}
-			return record, { userId }
+			return record, ownerIds(userId)
 		end)
 
 		if ok then
