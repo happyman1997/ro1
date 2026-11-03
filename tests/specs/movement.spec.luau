@@ -108,4 +108,31 @@ return function(test)
 			)
 		end
 	)
+
+	test(
+		"после гибели игрок возрождается у своего ресторана",
+		function(world, expect)
+			local player = world:addPlayer("Player", 1)
+			world:advance(0.5)
+			local spawn = world:plot(1):FindFirstChild("Spawn")
+			local function distanceToSpawn(): number
+				local root = player.Character.HumanoidRootPart.Position
+				return (world.Vector3.new(root.X, 0, root.Z) - world.Vector3.new(spawn.Position.X, 0, spawn.Position.Z)).Magnitude
+			end
+			expect.less(distanceToSpawn(), 4, "после входа — у своего ресторана")
+			world:humanoid(player).Health = 0
+			world:spawnCharacter(player) -- Roblox возрождает персонажа в лобби (точки участков не нейтральные)
+			world:advance(0.1)
+			expect.less(
+				distanceToSpawn(),
+				4,
+				"после возрождения сервер вернул к своему ресторану"
+			)
+			world:advance(1)
+			expect.falsy(
+				world:hasWarning("слишком быстрое перемещение"),
+				"это не считается нарушением"
+			)
+		end
+	)
 end
