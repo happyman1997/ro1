@@ -251,4 +251,44 @@ return function(test)
 			"участок освобождён — клиентов нет"
 		)
 	end)
+
+	test("/customers показывает, что происходит с клиентами", function(world, expect)
+		local owner, plot, customers = setup(world)
+		waitForOrdering(world, customers, plot)
+		world:chat(owner, "/customers")
+		local text = world:notifications(owner)[#world:notifications(owner)]
+		expect.truthy(string.find(text, "Клиенты: открыто", 1, true), "открыто")
+		expect.truthy(string.find(text, "мест у стойки 2", 1, true), "точки найдены")
+		expect.greater(
+			tonumber(string.match(text, "всего пришло (%d+)")) or 0,
+			0,
+			"счётчик пришедших"
+		)
+
+		world:chat(owner, "/break")
+		world:advance(3)
+		world:chat(owner, "/customers")
+		text = world:notifications(owner)[#world:notifications(owner)]
+		expect.truthy(
+			string.find(text, "закрыто: ресторан стоит", 1, true),
+			"причина закрытия"
+		)
+	end)
+
+	test(
+		"нет точек маршрута — предупреждение в Output, один раз",
+		function(world, expect)
+			local _, plot, customers = setup(world)
+			plot.model:FindFirstChild("Restaurant"):FindFirstChild("Door", true):Destroy()
+			world:advance(15)
+			expect.equal(#customers:getCustomers(plot), 0, "без входа клиенты не приходят")
+			local count = 0
+			for _, message in world.warnings do
+				if string.find(message, "[Customers] В модели", 1, true) then
+					count += 1
+				end
+			end
+			expect.equal(count, 1, "предупреждение одно, а не каждые полсекунды")
+		end
+	)
 end

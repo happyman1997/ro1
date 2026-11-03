@@ -286,4 +286,20 @@ return function(test)
 			)
 		end
 	)
+
+	test(
+		"в Studio у тестовых игроков отрицательные UserId — группа работает",
+		function(world, expect)
+			-- Test → Clients and Servers: Player1 = -1, Player2 = -2.
+			local first = world:addPlayer("Player1", -1)
+			local second = world:addPlayer("Player2", -2)
+			world:advance(0.5)
+			world:startClient(first)
+			world:click(world:gui(first, "PartyTab"))
+			world:click(world:gui(first, "Invite_-2"))
+			expect.equal(#world:received(second, "PartyInvite"), 1, "приглашение дошло")
+			world:fireServer(second, "RespondPartyInvite", -1, true)
+			expect.truthy(party(world):areAllies(first, second), "в группе")
+		end
+	)
 end

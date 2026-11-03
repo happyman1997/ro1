@@ -86,6 +86,8 @@ type PlotState = {
 	customers: { Customer },
 	folder: Folder,
 	nextSpawnAt: number,
+	spawned: number, -- сколько клиентов пришло всего (для диагностики)
+	warnedNoPoints: boolean,
 }
 
 local CustomerService = {}
@@ -270,6 +272,13 @@ local function trySpawn(plot: Plot, state: PlotState)
 	local spawns = tagged(restaurant, "CustomerSpawn")
 	local door: BasePart? = tagged(restaurant, "CustomerDoor")[1]
 	if #spawns == 0 or door == nil then
+		if not state.warnedNoPoints then
+			state.warnedNoPoints = true
+			warn(
+				`[Customers] В модели {restaurant:GetFullName()} нет точек маршрута клиентов `
+					.. "(теги CustomerSpawn и CustomerDoor): клиенты не придут"
+			)
+		end
 		return
 	end
 	local taken = {}
@@ -310,6 +319,7 @@ local function trySpawn(plot: Plot, state: PlotState)
 	}
 	customerByModel[model] = customer
 	table.insert(state.customers, customer)
+	state.spawned += 1
 	startSegment(customer)
 end
 
@@ -419,6 +429,34 @@ function CustomerService:hit(part: Instance): boolean
 	return true
 end
 
+-- Что происходит с клиентами ресторана — одной строкой (чат-команда /customers).
+function CustomerService:describe(plot: Plot): string
+	local state = plotStates[plot]
+	local restaurant = plot.restaurant
+	if state == nil or restaurant == nil then
+		return "Клиенты: ресторан ещё не построен"
+	end
+	local tier = Tiers[plot.tier]
+	local reasons = {}
+	if plot.owner == nil then
+		table.insert(reasons, "нет владельца")
+	end
+	if plot.model:GetAttribute("Operational") == false then
+		table.insert(reasons, "ресторан стоит")
+	end
+	if PlotService:isInCombat(plot) then
+		table.insert(reasons, "идёт бой")
+	end
+	local status = if #reasons == 0 then "открыто" else "закрыто: " .. table.concat(reasons, ", ")
+	local limit = if tier then tostring(tier.MaxCustomers) else "?"
+	local now = #CustomerService:getCustomers(plot)
+	local spawns = #tagged(restaurant, "CustomerSpawn")
+	local doors = #tagged(restaurant, "CustomerDoor")
+	local spots = #tagged(restaurant, "CustomerOrder")
+	return `Клиенты: {status}. Сейчас {now} из {limit}, всего пришло {state.spawned}. `
+		.. `Точки: появление {spawns}, вход {doors}, мест у стойки {spots}.`
+end
+
 -- Клиенты ресторана (для тестов и других систем).
 function CustomerService:getCustomers(plot: Plot): { Model }
 	local state = plotStates[plot]
@@ -450,7 +488,7 @@ function CustomerService:Start()
 			local folder = Instance.new("Folder")
 			folder.Name = "Customers"
 			folder.Parent = plot.model
-			state = { customers = {}, folder = folder, nextSpawnAt = 0 }
+			state = { customers = {}, folder = folder, nextSpawnAt = 0, spawned = 0, warnedNoPoints = false }
 			plotStates[plot] = state
 		end
 		-- Новая модель — новые точки маршрута: старые клиенты исчезают.

@@ -25,6 +25,11 @@ local Guard = require(ReplicatedStorage.Shared.Guard)
 local PartyConfig = require(ReplicatedStorage.Shared.Config.Party)
 local NetService = require(script.Parent.NetService)
 
+-- UserId: в Studio у тестовых игроков (Test → Clients and Servers) он
+-- отрицательный (-1, -2…), поэтому принимаем любое целое. Существует ли такой
+-- игрок, сервер всё равно проверяет сам (GetPlayerByUserId).
+local USER_ID = Guard.integer(-2 ^ 53, 2 ^ 53)
+
 local MAX_SIZE = PartyConfig.MaxSize
 local INVITE_TTL = PartyConfig.InviteTtl
 local LEAVE_GRACE = PartyConfig.LeaveGrace
@@ -197,7 +202,7 @@ function PartyService:Start()
 	end)
 
 	NetService:on("InviteToParty", {
-		args = { Guard.integer(1, 2 ^ 53) },
+		args = { USER_ID },
 		rate = 1,
 		burst = 3,
 	}, function(player: Player, userId: number)
@@ -209,7 +214,7 @@ function PartyService:Start()
 		PartyService:invite(player, target)
 	end)
 	NetService:on("RespondPartyInvite", {
-		args = { Guard.integer(1, 2 ^ 53), Guard.boolean() },
+		args = { USER_ID, Guard.boolean() },
 		rate = 2,
 		burst = 4,
 	}, function(player: Player, inviterId: number, accept: boolean)

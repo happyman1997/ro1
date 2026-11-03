@@ -3,8 +3,10 @@
 	HudController — основной интерфейс игрока.
 
 	• Сверху слева: деньги, уровень ресторана, состояние («работает» / «стоит»).
-	• Снизу: «Улучшить», «Починить» (только когда ресторан стоит), «Охрана»,
-	  «Магазин», «Класс», «Группа», «Рейтинг», «Настройки».
+	• Снизу слева: «Улучшить», «Починить» (только когда ресторан стоит),
+	  способность класса.
+	• Справа столбиком — вкладки: «Охрана», «Магазин», «Класс», «Группа»,
+	  «Рейтинг», «Настройки». Так всё помещается и в маленьком окне, и на телефоне.
 	• Панели: охрана (наём и увольнение по слотам), магазин оружия, выбор класса,
 	  группа (приглашения, состав, выход), глобальные рейтинги, настройки.
 
@@ -101,10 +103,12 @@ local function makePanel(name: string, title: string): Frame
 		Visible = false,
 		AnchorPoint = Vector2.new(0.5, 0.5),
 		Position = UDim2.fromScale(0.5, 0.5),
-		Size = UDim2.new(0, 460, 0, 380),
+		-- Почти весь экран, но не больше 460×380: на телефоне панель не вылезает за край.
+		Size = UDim2.fromScale(0.9, 0.8),
 		BackgroundColor3 = COLORS.panel,
 		BackgroundTransparency = 0.05,
 	}, gui)
+	make("UISizeConstraint", { MaxSize = Vector2.new(460, 380) }, panel)
 	rounded(panel, 12)
 	make("TextLabel", {
 		Name = "Title",
@@ -559,41 +563,38 @@ local function build()
 	end)
 	buttons.AbilityButton.BackgroundColor3 = COLORS.accent
 	buttons.AbilityButton.TextColor3 = COLORS.panel
-	buttons.DefenseTab = makeButton("DefenseTab", "Охрана", bar, function()
-		togglePanel("DefensePanel")
-	end)
-	buttons.ShopTab = makeButton("ShopTab", "Магазин", bar, function()
-		togglePanel("ShopPanel")
-	end)
-	buttons.ClassTab = makeButton("ClassTab", "Класс", bar, function()
-		togglePanel("ClassPanel")
-	end)
-	buttons.PartyTab = makeButton("PartyTab", "Группа", bar, function()
-		togglePanel("PartyPanel")
-	end)
-	buttons.LeaderboardTab = makeButton("LeaderboardTab", "Рейтинг", bar, function()
-		togglePanel("LeaderboardPanel")
-	end)
-	buttons.SettingsTab = makeButton("SettingsTab", "Настройки", bar, function()
-		togglePanel("SettingsPanel")
-	end)
-	for order, name in
-		{
-			"UpgradeButton",
-			"RepairButton",
-			"AbilityButton",
-			"DefenseTab",
-			"ShopTab",
-			"ClassTab",
-			"PartyTab",
-			"LeaderboardTab",
-			"SettingsTab",
-		}
-	do
+	for order, name in { "UpgradeButton", "RepairButton", "AbilityButton" } do
 		buttons[name].LayoutOrder = order
-		if string.find(name, "Tab$") then
-			buttons[name].Size = UDim2.new(0, 110, 0, 44) -- вкладки уже, чтобы ряд помещался
-		end
+	end
+
+	-- Вкладки — столбиком у правого края, по центру по высоте.
+	local tabs = make("Frame", {
+		Name = "TabBar",
+		AnchorPoint = Vector2.new(1, 0.5),
+		Position = UDim2.new(1, -12, 0.5, 0),
+		Size = UDim2.new(0, 120, 0, 6 * 40 + 5 * 6),
+		BackgroundTransparency = 1,
+	}, gui)
+	make("UIListLayout", {
+		FillDirection = Enum.FillDirection.Vertical,
+		Padding = UDim.new(0, 6),
+		SortOrder = Enum.SortOrder.LayoutOrder,
+	}, tabs)
+	local tabList = {
+		{ "DefenseTab", "Охрана", "DefensePanel" },
+		{ "ShopTab", "Магазин", "ShopPanel" },
+		{ "ClassTab", "Класс", "ClassPanel" },
+		{ "PartyTab", "Группа", "PartyPanel" },
+		{ "LeaderboardTab", "Рейтинг", "LeaderboardPanel" },
+		{ "SettingsTab", "Настройки", "SettingsPanel" },
+	}
+	for order, tab in tabList do
+		local name, text, panelName = tab[1], tab[2], tab[3]
+		buttons[name] = makeButton(name, text, tabs, function()
+			togglePanel(panelName)
+		end)
+		buttons[name].Size = UDim2.new(1, 0, 0, 40)
+		buttons[name].LayoutOrder = order
 	end
 
 	makePanel("DefensePanel", "Охрана ресторана")
