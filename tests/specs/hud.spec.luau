@@ -131,4 +131,19 @@ return function(test)
 		world:click(world:gui(player, "ClassPanel"):FindFirstChild("CloseButton"))
 		expect.equal(world:gui(player, "ClassPanel").Visible, false, "закрыта крестиком")
 	end)
+
+	test(
+		"вкладки — столбиком справа, действия — внизу слева",
+		function(world, expect)
+			local player = setup(world)
+			local tabBar = world:gui(player, "TabBar")
+			for _, name in { "DefenseTab", "ShopTab", "ClassTab", "PartyTab", "LeaderboardTab", "SettingsTab" } do
+				expect.equal(world:gui(player, name).Parent, tabBar, name .. " в столбике справа")
+			end
+			local actionBar = world:gui(player, "ActionBar")
+			for _, name in { "UpgradeButton", "RepairButton", "AbilityButton" } do
+				expect.equal(world:gui(player, name).Parent, actionBar, name .. " внизу")
+			end
+		end
+	)
 end

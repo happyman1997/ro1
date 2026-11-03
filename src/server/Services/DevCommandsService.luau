@@ -20,6 +20,7 @@
 	/buy <оружие>     купить оружие за Cash (как в магазине)
 	/fill             заполнить свою кассу до предела
 	/break            сломать мебель в своём ресторане
+	/customers        что происходит с NPC-клиентами своего ресторана
 ]]
 
 local CollectionService = game:GetService("CollectionService")
@@ -32,6 +33,7 @@ local Classes = require(ReplicatedStorage.Shared.Config.Classes)
 local Tiers = require(ReplicatedStorage.Shared.Config.Tiers)
 local CashRegisterService = require(script.Parent.CashRegisterService)
 local ClassService = require(script.Parent.ClassService)
+local CustomerService = require(script.Parent.CustomerService)
 local DefenseService = require(script.Parent.DefenseService)
 local Defense = require(ReplicatedStorage.Shared.Config.Defense)
 local DataService = require(script.Parent.DataService)
@@ -184,6 +186,20 @@ commands.fill = {
 		end
 		CashRegisterService:deposit(plot, Tiers[plot.tier].RegisterCapacity)
 		NetService:notify(player, "Касса заполнена")
+	end,
+}
+
+commands.customers = {
+	usage = "/customers — что происходит с клиентами своего ресторана",
+	run = function(player: Player)
+		local plot = PlotService:getPlot(player)
+		if plot == nil then
+			NetService:notify(player, "У вас нет участка")
+			return
+		end
+		local text = CustomerService:describe(plot)
+		print(`[DevCommands] {player.Name}: {text}`) -- копия в Output
+		NetService:notify(player, text)
 	end,
 }
 
